@@ -1,6 +1,7 @@
 const path = require('path')
 const express = require('express')
 const morgan = require('morgan')
+//const bodyParser = require('body-parser')
 const compression = require('compression')
 const session = require('express-session')
 const passport = require('passport')
@@ -20,6 +21,11 @@ const websocketSetup = require('./socket')
 //const WebSocket = require('ws')
 //const ws = require('ws')
 //const WebSocketServer = ws.Server
+
+const https = require('https');
+const url = require('url');
+const fs = require('fs');
+
 
 module.exports = app
 
@@ -99,6 +105,23 @@ const createApp = () => {
 const startListening = () => {
   // start listening (and create a 'server' object representing our server)
   const server = app.listen(PORT, () => console.log(`Mixing it up on port ${PORT}`))
+
+/*
+  let httpsOptions = {
+  };
+
+  let server = https.createServer(httpsOptions, function(request, response) {
+    log("Received secure request for " + request.url);
+    response.writeHead(404);
+    response.end();
+  });
+
+  server.listen(8080, function() {
+  console.log("Server is listening on port 6503");
+  });
+
+*/
+
   console.log('server is', server)
   /*
   //The app.listen() method returns an http.Server object and (for HTTP)
@@ -114,6 +137,7 @@ const startListening = () => {
       autoAcceptConnections: true // You should use false here!
   });
 
+  console.log('server/index.js, server wsServer is: ', wsServer)
 
   const connectionArray = []
   let nextID = Date.now()
@@ -141,18 +165,3 @@ if (require.main === module) {
   createApp()
 }
 
-
-/*
-  app.ws('/', (s, req) => {
-    console.error('websocket connection')
-    for (var t = 0; t < 3; t++)
-      setTimeout(() => s.send('message from server', ()=>{}), 1000*t)
-  })
-
-  app.ws('/echo', function(ws, req) {
-    ws.on('message', function(msg) {
-      console.log(msg)
-      ws.send(msg)
-    })
-    console.log('socket', req.testing)
-*/
