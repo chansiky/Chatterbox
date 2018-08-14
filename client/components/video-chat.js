@@ -38,6 +38,7 @@ class VideoChat extends React.Component {
       usernameInput: '',
       targetUsername: null, //should targetUsername be kept in state?
       textInput: '',
+      userList: [],
       disabled: {
         hangup: true,
         text: true,
@@ -166,15 +167,15 @@ class VideoChat extends React.Component {
           break;
 
         case 'video-answer':  // Callee has answered our offer
-          handleVideoAnswerMsg(msg);
+          this.handleVideoAnswerMsg(msg);
           break;
 
         case 'new-ice-candidate': // A new ICE candidate has been received
-          handleNewICECandidateMsg(msg);
+          this.handleNewICECandidateMsg(msg);
           break;
 
         case 'hang-up': // The other peer has hung up the call
-          handleHangUpMsg(msg);
+          this.handleHangUpMsg(msg);
           break;
 
         // Unknown message; output to console for debugging.
@@ -265,7 +266,7 @@ class VideoChat extends React.Component {
     this.myPeerConnection = new RTCPeerConnection({
       iceServers: [     // Information about ICE servers - Use your own!
         {
-          urls: 'turn:' + myHostname,  // A TURN server
+          urls: 'turn:' + this.myHostname,  // A TURN server
           username: 'webrtc',
           credential: 'turnserver'
         }]
@@ -540,7 +541,7 @@ class VideoChat extends React.Component {
   
       log('Requesting webcam access...');
   
-      navigator.mediaDevices.getUserMedia(mediaConstraints)
+      navigator.mediaDevices.getUserMedia(this.mediaConstraints)
       .then((localStream) => {
         log('-- Local video stream obtained');
         this.refLocalVideo.current.src = window.URL.createObjectURL(localStream)
@@ -586,6 +587,7 @@ class VideoChat extends React.Component {
   // session.
   setUsername() {
     this.myUsername = this.state.usernameInput
+    console.log('sending username', this.myUsername)
 
     this.sendToServer({
       name: this.myUsername,
@@ -740,6 +742,14 @@ class VideoChat extends React.Component {
           <div className="flexChild rowParent">
             <div className="flexChild rowParent">
               <div className="flexChild" id="userlist-container">
+                {
+                  (this.state.userList) &&
+                   this.state.userList.map((user) => { 
+                    <div>
+                      user
+                    </div >
+                  })
+                }
                 <ul ref={this.refUserlistbox} id="userlistbox" />
               </div>
               <div className="flexChild" id="chat-container">
