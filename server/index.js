@@ -122,7 +122,7 @@ const startListening = () => {
 
 */
 
-  console.log('server is', server)
+  //console.log('server is', server)
   /*
   //The app.listen() method returns an http.Server object and (for HTTP)
   ////is a convenience method for the following:
@@ -137,7 +137,7 @@ const startListening = () => {
       autoAcceptConnections: true // You should use false here!
   });
 
-  console.log('server/index.js, server wsServer is: ', wsServer)
+  //console.log('server/index.js, server wsServer is: ', wsServer)
 
   const connectionArray = []
   let nextID = Date.now()
