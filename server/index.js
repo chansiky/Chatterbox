@@ -89,6 +89,7 @@ const createApp = () => {
 
   // sends index.html
   app.use('*', (req, res) => {
+    console.log('we are sending public/index.html')
     res.sendFile(path.join(__dirname, '..', 'public/index.html'))
   })
 
@@ -104,7 +105,7 @@ const createApp = () => {
 
 const startListening = () => {
   // start listening (and create a 'server' object representing our server)
-  const server = app.listen(process.env.port||4444, () => console.log(`Mixing it up on port ${PORT}`))
+  const server = app.listen(PORT, '0.0.0.0', () => console.log(`Mixing it up on port ${PORT}`))
 /*
   let httpsOptions = {
   };
@@ -121,7 +122,7 @@ const startListening = () => {
 
 */
 
-  console.log('server is', server)
+  //console.log('server is', server)
   /*
   //The app.listen() method returns an http.Server object and (for HTTP)
   ////is a convenience method for the following:
@@ -136,7 +137,7 @@ const startListening = () => {
       autoAcceptConnections: true // You should use false here!
   });
 
-  console.log('server/index.js, server wsServer is: ', wsServer)
+  //console.log('server/index.js, server wsServer is: ', wsServer)
 
   const connectionArray = []
   let nextID = Date.now()

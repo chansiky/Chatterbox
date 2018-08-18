@@ -54,7 +54,7 @@ class VideoChat extends React.Component {
 
 
     this.myHostname = window.location.hostname;
-    console.log('Hostname: ' + this.myHostname);
+    //console.log('Hostname: ' + this.myHostname);
 
     //this.myUsername = null;
     //this.targetUsername = null;      // To store username of other peer
@@ -111,8 +111,8 @@ class VideoChat extends React.Component {
       scheme += 's';
     }
     serverUrl = scheme + '://' + this.myHostname + ':8080';
-    console.log('serverUrl ', serverUrl)
-    console.log('this is ',this)
+    //console.log('serverUrl ', serverUrl)
+    //console.log('this is ',this)
 
     this.connection = new WebSocket(serverUrl, 'json');
     
@@ -314,7 +314,6 @@ class VideoChat extends React.Component {
   // format, codec, resolution, etc.
 
   handleChange(event) {
-    console.log('event is :', event)
     this.setState({
       [event.target.name]: event.target.value
     })
@@ -587,7 +586,7 @@ class VideoChat extends React.Component {
   // session.
   setUsername() {
     this.myUsername = this.state.usernameInput
-    console.log('sending username', this.myUsername)
+    //console.log('sending username', this.myUsername)
 
     this.sendToServer({
       name: this.myUsername,
