@@ -25,7 +25,6 @@ class DataChat extends React.Component {
     this.sendChannel      = null;       // RTCDataChannel for the local (sender)
     this.receiveChannel   = null;
 
-    this.testString                       = '123'
     this.connectPeers                     = this.connectPeers.bind(this)
     this.disconnectPeers                  = this.disconnectPeers.bind(this)
     this.handleChange                     = this.handleChange.bind(this)
@@ -53,11 +52,6 @@ class DataChat extends React.Component {
     //sendButton.addEventListener('click', this.sendMessage, false);
   }
 
-
-  hello() {
-    console.log('hello everybody')
-  }
-
   handleChange(e) {
     this.setState({
       [e.target.name]: e.target.value
@@ -66,7 +60,6 @@ class DataChat extends React.Component {
 
   connectPeers() {
     //setup local connection
-    console.log(this.testString)
     this.localConnection = new RTCPeerConnection();
 
     this.sendChannel = this.localConnection.createDataChannel('SendChannel')
@@ -122,7 +115,7 @@ class DataChat extends React.Component {
   // Handle an error that occurs during addition of ICE candidate.
 
   handleAddCandidateError() {
-    console.log('we are inside handleAddCandidateError,')
+    console.log('handleAddCandidate failed')
   }
 
   // Handles clicks on the "Send" button by transmitting
