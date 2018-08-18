@@ -92,7 +92,7 @@ const websocketServer = (wsServer, connectionArray, nextID, appendToMakeUnique =
 
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
-            console.log('Received Message: ' + message.utf8Data);
+            //console.log('Received Message: ' + message.utf8Data);
 
             // Process messages
 
@@ -151,7 +151,7 @@ const websocketServer = (wsServer, connectionArray, nextID, appendToMakeUnique =
         return el.connected;
       });
       sendUserListToAll();  // Update the user lists
-      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+      //console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
   });
 }
