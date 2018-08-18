@@ -112,7 +112,7 @@ class VideoChat extends React.Component {
     }
     serverUrl = scheme + '://' + this.myHostname + ':8080';
     console.log('serverUrl ', serverUrl)
-    console.log('this is ',this)
+    //console.log('this is ',this)
 
     this.connection = new WebSocket(serverUrl, 'json');
     
@@ -314,7 +314,7 @@ class VideoChat extends React.Component {
   // format, codec, resolution, etc.
 
   handleChange(event) {
-    console.log('event is :', event)
+    //console.log('event is :', event)
     this.setState({
       [event.target.name]: event.target.value
     })
