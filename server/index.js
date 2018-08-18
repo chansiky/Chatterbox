@@ -89,6 +89,7 @@ const createApp = () => {
 
   // sends index.html
   app.use('*', (req, res) => {
+    console.log('we are sending public/index.html')
     res.sendFile(path.join(__dirname, '..', 'public/index.html'))
   })
 
@@ -104,7 +105,7 @@ const createApp = () => {
 
 const startListening = () => {
   // start listening (and create a 'server' object representing our server)
-  const server = app.listen(process.env.port||4444, () => console.log(`Mixing it up on port ${PORT}`))
+  const server = app.listen(PORT, () => console.log(`Mixing it up on port ${PORT}`))
 /*
   let httpsOptions = {
   };
