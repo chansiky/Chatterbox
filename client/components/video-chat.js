@@ -90,12 +90,18 @@ class VideoChat extends React.Component {
 
   // Open and configure the connection to the WebSocket server.
   connect() {
+
+    var HOST = location.origin.replace(/^http/, 'ws')
+    //var ws = new WebSocket(HOST);
+
     console.log("tying to connect")
     let serverUrl;
     let scheme = 'ws';
 
-    const PORT = process.env.PORT ||8080
+    //const PORT = process.env.PORT ||8080
 
+
+    /*
     // If this is an HTTPS connection, we have to use a secure WebSocket
     // connection too, so add another "s" to the scheme.
 
@@ -105,10 +111,12 @@ class VideoChat extends React.Component {
     serverUrl = scheme + '://' + this.myHostname + ':' + PORT;
     //console.log('serverUrl ', serverUrl)
     //console.log('this is ',this)
+    */
 
-    console.log("port is ,", serverUrl)
-    this.connection = new WebSocket(serverUrl, 'json');
+    console.log("host is ,", HOST)
+    this.connection = new WebSocket(HOST, 'json');
     console.log("this.connection is", this.connection)
+
     
 
     this.connection.onopen = (evt) => {
