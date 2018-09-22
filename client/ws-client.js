@@ -1,3 +1,4 @@
+/*
 const ws = new WebSocket('ws://localhost:40510');
 
 // event emmited when connected
@@ -12,3 +13,4 @@ ws.onmessage = function (ev) {
 }
 
 export default ws
+*/
