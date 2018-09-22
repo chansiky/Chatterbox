@@ -89,7 +89,7 @@ class VideoChat extends React.Component {
 
   // Open and configure the connection to the WebSocket server.
   connect() {
-    console.log('tying to connect")
+    console.log("tying to connect")
     let serverUrl;
     let scheme = 'ws';
 
