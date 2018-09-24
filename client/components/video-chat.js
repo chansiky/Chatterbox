@@ -22,8 +22,8 @@ class VideoChat extends React.Component {
   constructor(){
     super()
 
+    this.myUsername = null
     this.state = {
-      myUsername: null,
       usernameInput: '',
       targetUsername: null, //should targetUsername be kept in state?
       textInput: '',
@@ -61,6 +61,10 @@ class VideoChat extends React.Component {
       audio: true,            // We want an audio track
       video: true             // ...and we want a video track
     };
+
+/*
+Error opening your camera and/or microphone: Failed to execute 'createAnswer' on 'RTCPeerConnection': PeerConnection cannot create an answer in a state other than have-remote-offer or have-local-pranswer.
+*/
 
     this.connect                      = this.connect              .bind(this)
     this.closeVideoCall               = this.closeVideoCall.bind(this)
@@ -130,8 +134,8 @@ class VideoChat extends React.Component {
           break;
 
         case 'rejectusername':
-          myUsername = msg.name;
-          text = '<b>Your username has been set to <em>' + myUsername +
+          this.myUsername = msg.name;
+          text = '<b>Your username has been set to <em>' + this.myUsername +
             '</em> because the name you chose is in use.</b><br>';
           break;
 
@@ -171,7 +175,6 @@ class VideoChat extends React.Component {
 
       if (text.length) {
         chatFrameDocument.write(text);
-        this.refChatbox.current.contentWindow.scrollByPages(1);
         //document.getElementById('chatbox').contentWindow.scrollByPages(1);
       }
     }
@@ -489,7 +492,7 @@ class VideoChat extends React.Component {
   hangUpCall() {
     this.closeVideoCall();
     this.sendToServer({
-      name: this.state.myUsername,
+      name: this.myUsername,
       target: this.state.targetUsername,
       type: 'hang-up'
     });
@@ -500,16 +503,18 @@ class VideoChat extends React.Component {
   // the callee here -- calling RTCPeerConnection.addStream() issues
   // a |notificationneeded| event, so we'll let our handler for that
   // make the offer.
+
   invite(event) {
     log('Starting to prepare an invitation');
     if (this.myPeerConnection) {
       alert("You can't start a call because you already have one open!");
     } else {
-      let clickedUsername = event.target.textContent;
+      let clickedUsername = event.target.value;
+      console.log('clickedUsername is,', clickedUsername)
   
       // Don't allow users to call themselves, because weird.
   
-      if (clickedUsername === this.state.myUsername) {
+      if (clickedUsername === this.myUsername) {
         alert("I'm afraid I can't let you talk to yourself. That would be weird.");
         return;
       }
@@ -609,6 +614,13 @@ class VideoChat extends React.Component {
 // stream, then create and send an answer to the caller.
 
   handleVideoOfferMsg(msg) {
+    console.log(msg)
+  }
+
+
+
+  handleVideoOfferMsgB(msg) {
+
     let localStream = null;
   
     this.setState({targetUsername : msg.name})
@@ -659,7 +671,7 @@ class VideoChat extends React.Component {
     })
     .then(() => {
       let msg = {
-        name: this.state.myUsername,
+        name: this.myUsername,
         target: this.state.targetUsername,
         type: 'video-answer',
         sdp: this.myPeerConnection.localDescription
@@ -713,6 +725,7 @@ class VideoChat extends React.Component {
               <button
                 id="invite-button"
                 onClick={this.invite}
+                value={elem}
               >
                 invite
               </button>
