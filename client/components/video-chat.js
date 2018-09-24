@@ -92,33 +92,12 @@ class VideoChat extends React.Component {
   connect() {
 
     var HOST = location.origin.replace(/^http/, 'ws')
-    //var ws = new WebSocket(HOST);
 
     console.log("tying to connect")
     let serverUrl;
     let scheme = 'ws';
 
-    //const PORT = process.env.PORT ||8080
-
-
-    /*
-    // If this is an HTTPS connection, we have to use a secure WebSocket
-    // connection too, so add another "s" to the scheme.
-
-    if (document.location.protocol === 'https:') {
-      scheme += 's';
-    }
-    serverUrl = scheme + '://' + this.myHostname + ':' + PORT;
-    //console.log('serverUrl ', serverUrl)
-    //console.log('this is ',this)
-    */
-
-    console.log("host is ,", HOST)
     this.connection = new WebSocket(HOST, 'json');
-    console.log("this.connection is", this.connection)
-
-    
-
     this.connection.onopen = (evt) => {
       this.setState({
         disabled: {...this.state.disabled , ...{text: false, send: false}}
@@ -165,7 +144,7 @@ class VideoChat extends React.Component {
         // call.
 
         case 'video-offer':  // Invitation and offer to chat
-          handleVideoOfferMsg(msg);
+          this.handleVideoOfferMsg(msg);
           break;
 
         case 'video-answer':  // Callee has answered our offer
@@ -469,26 +448,36 @@ class VideoChat extends React.Component {
   handleUserlistMsg(msg) {
     let i;
   
-    //let listElem = document.getElementById('userlistbox');
-    let listElem = this.refUserlistbox.current;
+    console.log('msg is,', msg)
+     
+    this.setState({
+      userList: msg.users
+    })
+    console.log('handling user list msg, this . state is', this.state)
+    
+    /*
+      //let listElem = document.getElementById('userlistbox');
+      let listElem = this.refUserlistbox.current;
   
-    // Remove all current list members. We could do this smarter,
-    // by adding and updating users instead of rebuilding from
-    // scratch but this will do for this sample.
+      // Remove all current list members. We could do this smarter,
+      // by adding and updating users instead of rebuilding from
+      // scratch but this will do for this sample.
   
-    while (listElem.firstChild) {
-      listElem.removeChild(listElem.firstChild);
-    }
+      while (listElem.firstChild) {
+        listElem.removeChild(listElem.firstChild);
+      }
   
-    // Add member names from the received list
+      // Add member names from the received list
   
-    for (i = 0; i < msg.users.length; i++) {
-      let item = document.createElement('li');
-      item.appendChild(document.createTextNode(msg.users[i]));
-      item.addEventListener('click', this.invite, false);
+      for (i = 0; i < msg.users.length; i++) {
+        let item = document.createElement('li');
+        item.appendChild(document.createTextNode(msg.users[i]));
+        item.addEventListener('click', this.invite, false);
   
-      listElem.appendChild(item);
-    }
+        listElem.appendChild(item);
+      }
+    */
+
   }
 
 
@@ -714,6 +703,22 @@ class VideoChat extends React.Component {
   }
 
   render(){
+    console.log('this.state.userList is ', this.state.userList)
+    const userListDiv = (this.state.userList.length > 0) ?
+      <div>
+        {this.state.userList.map((elem) => {
+          return(
+            <div>
+              {elem}
+            </div>
+          )
+        })}
+      </div> :
+      <div> no users </div>
+
+    console.log('userlist div is', userListDiv)
+
+
     return (
       <div>
         <p>Enter a username:
@@ -725,7 +730,7 @@ class VideoChat extends React.Component {
 
             id="name"
             type="text"
-            maxLength="12"
+            maxLength="20"
             required
             autoComplete="username"
             inputMode="verbatim"
@@ -743,20 +748,14 @@ class VideoChat extends React.Component {
           <div className="flexChild rowParent">
             <div className="flexChild rowParent">
               <div className="flexChild" id="userlist-container">
-                {
-                  (this.state.userList) &&
-                   this.state.userList.map((user) => { 
-                    <div>
-                      user
-                    </div >
-                  })
-                }
+
                 <ul ref={this.refUserlistbox} id="userlistbox" />
               </div>
               <div className="flexChild" id="chat-container">
                 <iframe id="chatbox" ref={this.refChatbox} />
               </div>
             </div>
+            {userListDiv}
 
             <div className="flexChild" id="camera-container">
               <div className="camera-box">

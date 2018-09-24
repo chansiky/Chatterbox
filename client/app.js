@@ -7,10 +7,14 @@ import Routes from './routes'
 const App = () => {
   return (
     <div>
-      <DataChat />
       <VideoChat />
     </div>
   )
 }
 
 export default App
+
+
+/*
+      <DataChat />
+*/

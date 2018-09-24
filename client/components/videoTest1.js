@@ -69,9 +69,9 @@ class VideoTestComponent extends React.Component {
 
     // Set event listeners for user interface widgets
 
-    this.connectButton.addEventListener('click', connectPeers, false);
-    this.disconnectButton.addEventListener('click', disconnectPeers, false);
-    this.sendButton.addEventListener('click', sendMessage, false);
+    this.connectButton.addEventListener('click', this.connectPeers, false);
+    this.disconnectButton.addEventListener('click', this.disconnectPeers, false);
+    this.sendButton.addEventListener('click', this.sendMessage, false);
   }
 
   connectPeers() {
@@ -80,31 +80,31 @@ class VideoTestComponent extends React.Component {
     this.localConnection = new RTCPeerConnection();
 
     // Create the data channel and establish its event listeners
-    this.sendChannel = localConnection.createDataChannel('sendChannel');
-    this.sendChannel.onopen = handleSendChannelStatusChange;
-    this.sendChannel.onclose = handleSendChannelStatusChange;
+    this.sendChannel = this.localConnection.createDataChannel('sendChannel');
+    this.sendChannel.onopen = this.handleSendChannelStatusChange;
+    this.sendChannel.onclose = this.handleSendChannelStatusChange;
 
     // Create the remote connection and its event listeners
     this.remoteConnection = new RTCPeerConnection();
-    this.remoteConnection.ondatachannel = receiveChannelCallback;
+    this.remoteConnection.ondatachannel = this.receiveChannelCallback;
 
     // Set up the ICE candidates for the two peers
     this.localConnection.onicecandidate = e => !e.candidate
-        || remoteConnection.addIceCandidate(e.candidate)
-        .catch(handleAddCandidateError);
+        || this.remoteConnection.addIceCandidate(e.candidate)
+        .catch(this.handleAddCandidateError);
 
     this.remoteConnection.onicecandidate = e => !e.candidate
-        || localConnection.addIceCandidate(e.candidate)
-        .catch(handleAddCandidateError);
+        || this.localConnection.addIceCandidate(e.candidate)
+        .catch(this.handleAddCandidateError);
 
     // Now create an offer to connect; this starts the process
     this.localConnection.createOffer()
-    .then(offer => localConnection.setLocalDescription(offer))
-    .then(() => remoteConnection.setRemoteDescription(localConnection.localDescription))
-    .then(() => remoteConnection.createAnswer())
-    .then(answer => remoteConnection.setLocalDescription(answer))
-    .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription))
-    .catch(handleCreateDescriptionError);
+    .then(offer => this.localConnection.setLocalDescription(offer))
+    .then(() => this.remoteConnection.setRemoteDescription(this.localConnection.localDescription))
+    .then(() => this.remoteConnection.createAnswer())
+    .then(answer => this.remoteConnection.setLocalDescription(answer))
+    .then(() => this.localConnection.setRemoteDescription(this.remoteConnection.localDescription))
+    .catch(this.handleCreateDescriptionError);
   }
 
 
@@ -119,7 +119,7 @@ class VideoTestComponent extends React.Component {
   }
 
   async invite(evt){
-    if (peerConnection) {
+    if (this.peerConnection) {
       alert('peer connection already exists.  cannot make another call')
     } else {
       let connection = 'channel name'

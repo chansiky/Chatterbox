@@ -228,6 +228,12 @@ class DataChat extends React.Component {
   render() {
     return (
       <div>
+        <button onClick={this.connectPeers} id="connectButton" name="connectButton" className="buttonleft" disabled={this.state.connectDisabled} >
+          Connect
+        </button>
+        <button onClick={this.disconnectPeers} id="disconnectButton" name="disconnectButton" className="buttonright" disabled={this.state.disconnectDisabled}>
+          Disconnect
+        </button>
         <div className="messagebox">
           <label htmlFor="message">Enter a message:
             <input
@@ -260,12 +266,6 @@ class DataChat extends React.Component {
         }
         </div>
 
-        <button onClick={this.connectPeers} id="connectButton" name="connectButton" className="buttonleft" disabled={this.state.connectDisabled} >
-          Connect
-        </button>
-        <button onClick={this.disconnectPeers} id="disconnectButton" name="disconnectButton" className="buttonright" disabled={this.state.disconnectDisabled}>
-          Disconnect
-        </button>
       </div>
     )
   }
