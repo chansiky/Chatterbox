@@ -75,7 +75,6 @@ class VideoTestComponent extends React.Component {
   }
 
   connectPeers() {
-    console.log('hello world')
     // Create the local connection and its event listeners
     this.localConnection = new RTCPeerConnection();
 

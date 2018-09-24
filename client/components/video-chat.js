@@ -88,7 +88,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
     this.handleUserlistMsg = this.handleUserlistMsg.bind(this)
     this.handleHangUpMsg = this.handleHangUpMsg.bind(this)
     this.invite = this.invite.bind(this)
-    this.handleVideoOfferMsg = this.handleVideoOfferMsg.bind(this) 
+    this.handleVideoOfferMsg = this.handleVideoOfferMsg.bind(this)
     this.handleNewICECandidateMsg  = this.handleNewICECandidateMsg.bind(this)
   }
 
@@ -113,6 +113,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       let chatFrameDocument = this.refChatbox.current.contentDocument
       //let chatFrameDocument = document.getElementById('chatbox').contentDocument;
       let text = '';
+      console.log('connection evt is:', evt)
       let msg = JSON.parse(evt.data);
       log('Message received: ');
       console.dir(msg);
@@ -156,7 +157,8 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
           break;
 
         case 'new-ice-candidate': // A new ICE candidate has been received
-          this.handleNewICECandidateMsg(msg);
+          console.log('msg is', msg)
+          //this.handleNewICECandidateMsg(msg);
           break;
 
         case 'hang-up': // The other peer has hung up the call
@@ -184,21 +186,21 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // make or receive another call if they wish. This is called both
   // when the user hangs up, the other user hangs up, or if a connection
   // failure is detected.
-  
+
   closeVideoCall() {
     let remoteVideo = this.refReceivedVideo
     let localVideo  = this.refLocalVideo
-  
+
     log('Closing the call');
-  
+
     // Close the RTCPeerConnection
-  
+
     if (this.myPeerConnection) {
       log('--> Closing the peer connection');
-  
+
       // Disconnect all our event listeners; we don't want stray events
       // to interfere with the hangup while it's ongoing.
-  
+
       this.myPeerConnection.onaddstream = null;  // For older implementations
       this.myPeerConnection.ontrack = null;      // For newer ones
       this.myPeerConnection.onremovestream = null;
@@ -207,32 +209,32 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       this.myPeerConnection.onsignalingstatechange = null;
       this.myPeerConnection.onicegatheringstatechange = null;
       this.myPeerConnection.onnotificationneeded = null;
-  
+
       // Stop the videos
-  
+
       if (this.remoteVideo.srcObject) {
         this.remoteVideo.srcObject.getTracks().forEach(track => track.stop());
       }
-  
+
       if (localVideo.srcObject) {
         this.localVideo.srcObject.getTracks().forEach(track => track.stop());
       }
-  
+
       this.remoteVideo.src = null;
       this.localVideo.src = null;
-  
+
       // Close the peer connection
-  
+
       this.myPeerConnection.close();
       this.myPeerConnection = null;
     }
-  
+
     // Disable the hangup button
-  
+
     this.setState({
       disabled: {...this.state.disabled, ...{hangup: true}}
     })
-  
+
     this.setState({ targetUsername : null })
   }
 
@@ -243,10 +245,10 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // needed notifications on the call.
   createPeerConnection() {
     log('Setting up a connection...');
-  
+
     // Create an RTCPeerConnection which knows to use our chosen
     // STUN server.
-  
+
     this.myPeerConnection = new RTCPeerConnection({
       iceServers: [     // Information about ICE servers - Use your own!
         {
@@ -255,10 +257,10 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
           credential: 'turnserver'
         }]
     });
-  
+
     // Do we have addTrack()? If not, we will use streams instead.
     this.hasAddTrack = (this.myPeerConnection.addTrack !== undefined);
-  
+
     // Set up event handlers for the ICE negotiation process.
     this.myPeerConnection.onicecandidate             = this.handleICECandidateEvent;
     this.myPeerConnection.onnremovestream            = this.handleRemoveStreamEvent;
@@ -266,15 +268,16 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
     this.myPeerConnection.onicegatheringstatechange  = this.handleICEGatheringStateChangeEvent;
     this.myPeerConnection.onsignalingstatechange     = this.handleSignalingStateChangeEvent;
     this.myPeerConnection.onnegotiationneeded        = this.handleNegotiationNeededEvent;
-  
+
     // Because the deprecation of addStream() and the addstream event is recent,
     // we need to use those if addTrack() and track aren't available.
-  
+
     if (this.hasAddTrack) {
       this.myPeerConnection.ontrack = this.handleTrackEvent;
     } else {
       this.myPeerConnection.onaddstream = this.handleAddStreamEvent;
     }
+    console.log('createPeerConnection was successful, peerConnection is', this.myPeerConnection)
   }
 
   // Called by the WebRTC layer when a stream starts arriving from the
@@ -314,7 +317,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // or that they declined to share their equipment when prompted. If
   // they simply opted not to share their media, that's not really an
   // error, so we won't present a message in that situation.
-  
+
   handleGetUserMediaError(e) {
     log(e);
     switch (e.name) {
@@ -330,17 +333,17 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
         alert('Error opening your camera and/or microphone: ' + e.message);
         break;
     }
-  
+
     // Make sure we shut down our end of the RTCPeerConnection so we're
     // ready to try again.
-  
+
     this.closeVideoCall();
   }
 
 
   handleHangUpMsg(msg) {
     log('*** Received hang up notification from other peer');
-  
+
     this.closeVideoCall();
   }
 
@@ -352,7 +355,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   handleICECandidateEvent(event) {
     if (event.candidate) {
       log('Outgoing ICE candidate: ' + event.candidate.candidate);
-  
+
       this.sendToServer({
         type: 'new-ice-candidate',
         target: this.state.targetUsername,
@@ -367,7 +370,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // This is called when the state of the ICE agent changes.
   handleICEConnectionStateChangeEvent(event) {
     log('*** ICE connection state changed to ' + this.myPeerConnection.iceConnectionState);
-  
+
     switch (this.myPeerConnection.iceConnectionState) {
       case 'closed':
       case 'failed':
@@ -380,7 +383,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
 
   handleNegotiationNeededEvent() {
     log('*** Negotiation needed');
-  
+
     log('---> Creating offer');
     this.myPeerConnection.createOffer().then((offer) => {
       log('---> Creating new description object to send to remote peer');
@@ -406,7 +409,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // Note that currently, the spec is hazy on exactly when this and other
   // "connection failure" scenarios should occur, so sometimes they simply
   // don't happen.
-  
+
   handleRemoveStreamEvent(event) {
     log('*** Stream removed');
     this.closeVideoCall();
@@ -449,38 +452,9 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // populates the user list box with those names, making each item
   // clickable to allow starting a video call.
   handleUserlistMsg(msg) {
-    let i;
-  
-    console.log('msg is,', msg)
-     
     this.setState({
       userList: msg.users
     })
-    console.log('handling user list msg, this . state is', this.state)
-    
-    /*
-      //let listElem = document.getElementById('userlistbox');
-      let listElem = this.refUserlistbox.current;
-  
-      // Remove all current list members. We could do this smarter,
-      // by adding and updating users instead of rebuilding from
-      // scratch but this will do for this sample.
-  
-      while (listElem.firstChild) {
-        listElem.removeChild(listElem.firstChild);
-      }
-  
-      // Add member names from the received list
-  
-      for (i = 0; i < msg.users.length; i++) {
-        let item = document.createElement('li');
-        item.appendChild(document.createTextNode(msg.users[i]));
-        item.addEventListener('click', this.invite, false);
-  
-        listElem.appendChild(item);
-      }
-    */
-
   }
 
 
@@ -510,38 +484,39 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       alert("You can't start a call because you already have one open!");
     } else {
       let clickedUsername = event.target.value;
-      console.log('clickedUsername is,', clickedUsername)
-  
+
       // Don't allow users to call themselves, because weird.
-  
+
       if (clickedUsername === this.myUsername) {
         alert("I'm afraid I can't let you talk to yourself. That would be weird.");
         return;
       }
-  
+
       // Record the username being called for future reference
-  
+      console.log('checkpoint 3')
+
       this.setState({targetUsername : clickedUsername})
       //targetUsername = clickedUsername;
       log('Inviting user ' + this.state.targetUsername);
-  
+
       // Call createPeerConnection() to create the RTCPeerConnection.
-  
+
       log('Setting up connection to invite user: ' + this.state.targetUsername);
       this.createPeerConnection();
-  
+
       // Now configure and create the local stream, attach it to the
       // "preview" box (id "local_video"), and add it to the
       // RTCPeerConnection.
-  
+
       log('Requesting webcam access...');
-  
+
       navigator.mediaDevices.getUserMedia(this.mediaConstraints)
       .then((localStream) => {
         log('-- Local video stream obtained');
         this.refLocalVideo.current.src = window.URL.createObjectURL(localStream)
         this.refLocalVideo.current.srcObject = localStream
-  
+        console.log('localStream is', localStream)
+
         if (this.hasAddTrack) {
           log('-- Adding tracks to the RTCPeerConnection');
           localStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, localStream));
@@ -552,6 +527,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       })
       .catch(this.handleGetUserMediaError);
     }
+    console.log('checkpoint 5')
   }
 
 // Responds to the "video-answer" message sent to the caller
@@ -559,7 +535,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
 
   handleVideoAnswerMsg(msg) {
     log('Call recipient has accepted our call');
-  
+
     // Configure the remote description, which is the SDP payload
     // in our "video-answer" message.
     let desc = new RTCSessionDescription(msg.sdp);
@@ -598,7 +574,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   // NOTE: This will actually move to the new RTCPeerConnectionState enum
   // returned in the property RTCPeerConnection.connectionState when
   // browsers catch up with the latest version of the specification!
-  
+
   handleSignalingStateChangeEvent(event) {
     log('*** WebRTC signaling state changed to: ' + this.myPeerConnection.signalingState);
     switch (this.myPeerConnection.signalingState) {
@@ -616,19 +592,20 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   handleVideoOfferMsg(msg) {
 
     let localStream = null;
-  
+
     this.setState({targetUsername : msg.name})
-  
+
     // Call createPeerConnection() to create the RTCPeerConnection.
-  
+
     log('Starting to accept invitation from ' + this.state.targetUsername);
     this.createPeerConnection();
-  
+
     // We need to set the remote description to the received SDP offer
     // so that our local WebRTC layer knows how to talk to the caller.
-  
+
     let desc = new RTCSessionDescription(msg.sdp);
-  
+
+
     this.myPeerConnection.setRemoteDescription(desc).then(() => {
       log('Setting up the local media stream...');
       return navigator.mediaDevices.getUserMedia(this.mediaConstraints);
@@ -638,7 +615,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       localStream = stream;
       this.refLocalVideo.current.src = window.URL.createObjectURL(localStream);
       this.refLocalVideo.current.srcObject = localStream;
-  
+
       if (this.hasAddTrack) {
         log('-- Adding tracks to the RTCPeerConnection');
         localStream.getTracks().forEach(track =>
@@ -648,6 +625,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
         this.myPeerConnection.addStream(localStream);
       }
     })
+    /*
     .then(() => {
       log('------> Creating answer');
       // Now that we've successfully set the remote description, we need to
@@ -670,25 +648,26 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
         type: 'video-answer',
         sdp: this.myPeerConnection.localDescription
       };
-  
+
       // We've configured our end of the call now. Time to send our
       // answer back to the caller so they know that we want to talk
       // and how to talk to us.
-  
+
       log('Sending answer packet back to other peer');
       this.sendToServer(msg);
     })
     .catch(this.handleGetUserMediaError);
+    */
   }
 
 
   // A new ICE candidate has been received from the other peer. Call
   // RTCPeerConnection.addIceCandidate() to send it along to the
   // local ICE framework.
-  
+
   handleNewICECandidateMsg(msg) {
     let candidate = new RTCIceCandidate(msg.candidate);
-  
+
     log('Adding received ICE candidate: ' + JSON.stringify(candidate));
     this.myPeerConnection.addIceCandidate(candidate)
       .catch(reportError);
@@ -703,13 +682,13 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
   //
   // We don't need to do anything when this happens, but we log it to the
   // console so you can see what's going on when playing with the sample.
-  
+
   handleICEGatheringStateChangeEvent(event) {
     log('*** ICE gathering state changed to: ' + this.myPeerConnection.iceGatheringState);
   }
 
   render(){
-    console.log('this.state.userList is ', this.state.userList)
+    //console.log('this.state.userList is ', this.state.userList)
     const userListDiv = (this.state.userList.length > 0) ?
       <div>
         {this.state.userList.map((elem) => {
@@ -729,7 +708,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       </div> :
       <div> no users </div>
 
-    console.log('userlist div is', userListDiv)
+    //console.log('userlist div is', userListDiv)
 
 
     return (
@@ -774,8 +753,8 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
               <div className="camera-box">
                 <video ref={this.refReceivedVideo} id="received_video" autoPlay />
                 <video ref={this.refLocalVideo} id="local_video" autoPlay muted />
-                <button 
-                  id="hangup-button" 
+                <button
+                  id="hangup-button"
                   onClick={this.hangUpCall}
                   disabled={this.state.disabled.hangup}>
                   Hang Up
