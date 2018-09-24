@@ -614,12 +614,6 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
 // stream, then create and send an answer to the caller.
 
   handleVideoOfferMsg(msg) {
-    console.log(msg)
-  }
-
-
-
-  handleVideoOfferMsgB(msg) {
 
     let localStream = null;
   
