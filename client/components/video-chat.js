@@ -613,6 +613,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
     .then((stream) => {
       log('-- Local video stream obtained');
       localStream = stream;
+
       this.refLocalVideo.current.src = window.URL.createObjectURL(localStream);
       this.refLocalVideo.current.srcObject = localStream;
 
@@ -625,7 +626,6 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
         this.myPeerConnection.addStream(localStream);
       }
     })
-    /*
     .then(() => {
       log('------> Creating answer');
       // Now that we've successfully set the remote description, we need to
@@ -634,6 +634,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
       // information, options agreed upon, and so forth.
       return this.myPeerConnection.createAnswer();
     })
+    /*
     .then((answer) => {
       log('------> Setting local description after creating answer');
       // We now have our answer, so establish that as the local description.
@@ -691,25 +692,24 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
     //console.log('this.state.userList is ', this.state.userList)
     const userListDiv = (this.state.userList.length > 0) ?
       <div>
-        {this.state.userList.map((elem) => {
+        {this.state.userList.map((elem,id) => {
           return(
-            <div>
+            <div key={id}>
               {elem}
-              <button
-                id="invite-button"
-                onClick={this.invite}
-                value={elem}
-              >
-                invite
-              </button>
+              {(elem == this.myUsername)? ' <--you' :
+                <button
+                  id="invite-button"
+                  onClick={this.invite}
+                  value={elem}
+                >
+                  invite
+                </button>
+              }
             </div>
           )
         })}
       </div> :
       <div> no users </div>
-
-    //console.log('userlist div is', userListDiv)
-
 
     return (
       <div>
@@ -735,6 +735,7 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
             Log In
           </button>
         </p>
+        {userListDiv}
 
         <div id="container" className="flexChild columnParent">
           <div className="flexChild rowParent">
@@ -747,21 +748,6 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
                 <iframe id="chatbox" ref={this.refChatbox} />
               </div>
             </div>
-            {userListDiv}
-
-            <div className="flexChild" id="camera-container">
-              <div className="camera-box">
-                <video ref={this.refReceivedVideo} id="received_video" autoPlay />
-                <video ref={this.refLocalVideo} id="local_video" autoPlay muted />
-                <button
-                  id="hangup-button"
-                  onClick={this.hangUpCall}
-                  disabled={this.state.disabled.hangup}>
-                  Hang Up
-                </button>
-              </div>
-            </div>
-          </div>
 
           <div className="flexChild rowParent" id="control-row">
             <div className="flexChild" id="empty-container" />
@@ -791,6 +777,21 @@ Error opening your camera and/or microphone: Failed to execute 'createAnswer' on
             </div>
           </div>
         </div>
+
+            <div className="flexChild" id="camera-container">
+              <div className="camera-box">
+                <video ref={this.refReceivedVideo} id="received_video" autoPlay />
+                <video ref={this.refLocalVideo} id="local_video" autoPlay muted />
+                <button
+                  id="hangup-button"
+                  onClick={this.hangUpCall}
+                  disabled={this.state.disabled.hangup}>
+                  Hang Up
+                </button>
+              </div>
+            </div>
+          </div>
+
       </div>
     )
   }
