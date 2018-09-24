@@ -625,7 +625,7 @@ class VideoChat extends React.Component {
   
     this.myPeerConnection.setRemoteDescription(desc).then(() => {
       log('Setting up the local media stream...');
-      return navigator.mediaDevices.getUserMedia(mediaConstraints);
+      return navigator.mediaDevices.getUserMedia(this.mediaConstraints);
     })
     .then((stream) => {
       log('-- Local video stream obtained');
@@ -710,6 +710,12 @@ class VideoChat extends React.Component {
           return(
             <div>
               {elem}
+              <button
+                id="invite-button"
+                onClick={this.invite}
+              >
+                invite
+              </button>
             </div>
           )
         })}
