@@ -58,7 +58,7 @@ class VideoTestComponent extends React.Component {
 
     this.startup()
 
-    }
+  }
 
   startup() {
     this.connectButton    = this.refButtonConnect.current

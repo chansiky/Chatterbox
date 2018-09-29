@@ -36,6 +36,7 @@
   "author": "github.com/chansiky",
   "license": "MIT",
   "dependencies": {
+    "@material-ui/core": "^3.1.1",
     "axios": "^0.15.3",
     "compression": "^1.7.3",
     "connect-session-sequelize": "^4.1.0",
@@ -57,9 +58,10 @@
     "redux-thunk": "^2.3.0",
     "sequelize": "^4.38.0",
     "socket.io": "^2.1.1",
-    "websocket": "^1.0.26",
+    "styled-components": "^3.4.9",
     "webpack": "^4.16.4",
-    "webpack-cli": "^3.1.0"
+    "webpack-cli": "^3.1.0",
+    "websocket": "^1.0.26"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.55",
@@ -95,6 +97,7 @@
     "react-test-renderer": "^16.4.2",
     "redux-devtools-extension": "^2.13.5",
     "redux-mock-store": "^1.5.3",
-    "supertest": "^3.1.0"
+    "supertest": "^3.1.0",
+    "webrtc-adapter": "^6.4.0"
   }
 }

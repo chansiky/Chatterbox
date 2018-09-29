@@ -7,8 +7,7 @@ import store from './store'
 import App from './app'
 import './ws-client'
 
-// establishes socket connection
-// import './socket'
+var isInitiator;
 
 ReactDOM.render(
   <Provider store={store}>
