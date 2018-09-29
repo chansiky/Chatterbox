@@ -7,8 +7,7 @@ import Routes from './routes'
 const App = () => {
   return (
     <div>
-      <VideoChat />
-      <DataComponent />
+      <Routes />
     </div>
   )
 }
@@ -19,4 +18,6 @@ export default App
 
 /*
       <DataChat />
+      <VideoChat />
+      <DataComponent />
 */

@@ -13,7 +13,7 @@ const app = express()
 const websocket = require('websocket')
 const WebSocketServer = websocket.server;
 const websocketSetup = require('./socket')
-//const socketio = require('socket.io')
+const socketio = require('socket.io')
 
 const https = require('https');
 const url = require('url');
@@ -99,33 +99,9 @@ const createApp = () => {
 const startListening = () => {
   // start listening (and create a 'server' object representing our server)
   const server = app.listen(PORT, '0.0.0.0', () => console.log(`Mixing it up on port ${PORT}`))
-/*
-  let httpsOptions = {
-  };
 
-  let server = https.createServer(httpsOptions, function(request, response) {
-    log("Received secure request for " + request.url);
-    response.writeHead(404);
-    response.end();
-  });
+  var io = socketio.listen(server);
 
-  server.listen(8080, function() {
-  console.log("Server is listening on port 6503");
-  });
-
-*/
-
-  //console.log('server is', server)
-  /*
-  //The app.listen() method returns an http.Server object and (for HTTP)
-  ////is a convenience method for the following:
-  app.listen = function() {
-  var server = http.createServer(this)
-  return server.listen.apply(server, arguments)
-  }
-  */
-  var io = socketio(server);
-  
   io.sockets.on('connection', function(socket) {
   
     // convenience function to log server messages on the client
@@ -181,21 +157,17 @@ const startListening = () => {
   
   });
 
+  /*
   const wsServer = new WebSocketServer({
       httpServer: server,
       autoAcceptConnections: true // You should use false here!
   });
-
-  //console.log('server/index.js, server wsServer is: ', wsServer)
 
   const connectionArray = []
   let nextID = Date.now()
   let appendToMakeUnique = 1
 
   websocketSetup(wsServer, connectionArray, nextID, appendToMakeUnique)
-  /*from original code
-  //set up our socket control center
-  const io = socketio(server)
   */
 }
 
