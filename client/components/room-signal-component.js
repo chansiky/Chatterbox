@@ -1,5 +1,6 @@
 import React from 'react'
 import socket from '../socket'
+import { PeerSignalComponent } from './index'
 
 class RoomSignalComponent extends React.Component{
   constructor(props){
@@ -20,6 +21,7 @@ class RoomSignalComponent extends React.Component{
         </h1>
         
         this component will console log a bunch of signals
+        <PeerSignalComponent />
       </div>
     )
   }

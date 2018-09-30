@@ -1,30 +1,15 @@
 import io from 'socket.io-client'
 
-/*
-const socket = io(window.location.origin)
-
-socket.on('connect', () => {
-  console.log('Connected!')
-})
-
-*/
-
-///////
-
-var isInitiator;
 
 //window.room = prompt("Enter room name:");
-window.room = ''
 
 var socket = io.connect();
 
-if (room !== "") {
-  console.log('Message from client: Asking to join room ' + room);
-  socket.emit('create or join', room);
-}
 
-socket.on('created', function(room, clientId) {
-  isInitiator = true;
+var isInitiator;
+
+socket.on.call(this,'created', function(room, clientId) {
+  this.isInitiator = true;
 });
 
 socket.on('full', function(room) {
@@ -35,15 +20,41 @@ socket.on('ipaddr', function(ipaddr) {
   console.log('Message from client: Server IP address is ' + ipaddr);
 });
 
-socket.on('joined', function(room, clientId) {
-  isInitiator = false;
+socket.on.call(this,'joined', function(room, clientId) {
+  this.isInitiator = false;
 });
 
 socket.on('log', function(array) {
   console.log.apply(console, array);
 });
 
+socket.on.call(this,'message', function(message) {
+  console.log('Client received message:', message);
+  
+  if (message === 'got user media') {
+    this.maybeStart();
+  } else if (message.type === 'offer') {
+    if (!isInitiator && !isStarted) {
+      this.maybeStart();
+    }
+    this.pc.setRemoteDescription(new RTCSessionDescription(message));
+    this.doAnswer();
+  } else if (message.type === 'answer' && isStarted) {
+    this.pc.setRemoteDescription(new RTCSessionDescription(message));
+  } else if (message.type === 'candidate' && isStarted) {
+    var candidate = new RTCIceCandidate({
+      sdpMLineIndex: message.label,
+      candidate: message.candidate
+    });
+    this.pc.addIceCandidate(candidate);
+  } else if (message === 'bye' && isStarted) {
+    this.handleRemoteHangup();
+  }
+})
+
+
 ///////
+
 
 
 export default socket

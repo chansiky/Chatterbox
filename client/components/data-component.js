@@ -17,6 +17,7 @@ class DataComponent extends React.Component{
     this.servers = {
       iceServers: [{ url: 'stun:stun.l.google.com:19302' }]
     }
+
     
   }
 

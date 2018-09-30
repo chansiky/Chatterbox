@@ -10,9 +10,9 @@ const db = require('./db')
 const sessionStore = new SequelizeStore({db})
 const PORT = process.env.PORT || 8080
 const app = express()
-const websocket = require('websocket')
-const WebSocketServer = websocket.server;
-const websocketSetup = require('./socket')
+//const websocket = require('websocket')
+//const WebSocketServer = websocket.server;
+//const websocketSetup = require('./socket')
 const socketio = require('socket.io')
 
 const https = require('https');
@@ -153,6 +153,10 @@ const startListening = () => {
           }
         });
       }
+    });
+
+    socket.on('bye', function(){
+      console.log('received bye');
     });
   
   });
