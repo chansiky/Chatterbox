@@ -1,6 +1,6 @@
 import React from 'react'
-import {Redirect} from 'react-router-dom'
 import {withRouter} from 'react-router'
+import history from '../history'
 
 import {TextField, Button} from '@material-ui/core'
 import {withStyles} from '@material-ui/core/styles'
@@ -37,19 +37,12 @@ class RoomSearchBar extends React.Component{
   }
 
   handleSubmit = (event) => {
-    if(this.state.roomField !== ''){
-      this.setState({
-        redirect: true,
-      })
-    }
+    event.preventDefault()
+    history.push(`/peer/${this.state.roomField}`)
   }
 
   render(props){
     const { classes } = this.props
-
-    if (this.state.redirect) {
-      return <Redirect to={'/peer/' + this.state.roomField} />
-    }
 
     return(
       <React.Fragment>
