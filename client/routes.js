@@ -20,7 +20,7 @@ class Routes extends Component {
       <Switch>
         {/* Routes placed here are available to all visitors */}
         <Route path="/room/:roomId" component={RoomSignalComponent} />
-        <Route path="/peer/:peerId" component={PeerSignalComponent} />
+        <Route path="/peer/:roomId" component={PeerSignalComponent} />
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
         {

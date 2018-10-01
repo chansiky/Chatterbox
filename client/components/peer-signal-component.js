@@ -1,5 +1,13 @@
 import React from 'React'
 import socket from '../socket'
+import { withStyles } from '@material-ui/core/styles';
+
+const styles = {
+  video: {
+    height: 50, 
+    width: 75,
+  }
+};
 
 const sendMessage = (message) => {
   console.log('Client sending message: ', message);
@@ -11,10 +19,10 @@ class PeerSignalComponent extends React.Component{
   constructor(props){
     super(props)
 
-    this.localStream = null
-    this.remoteStream = null
+    this.localStream = undefined
+    this.remoteStream = undefined
 
-    this.pc = null
+    this.pc = undefined
 
     this.isChannelReady = false;
     this.isInitiator = false;
@@ -47,12 +55,67 @@ class PeerSignalComponent extends React.Component{
         'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
       );
     }
+
+    this.initializeSocket()
+  }
+
+  initializeSocket = () => {
+
+    socket.on('created', (room) => {
+      console.log('Created room ' + room);
+      this.isInitiator = true;
+    });
+
+    socket.on('full', (room) => {
+      console.log('Room ' + room + ' is full');
+    });
+
+    socket.on('join', (room) => {
+      console.log('Another peer made a request to join room ' + room);
+      console.log('This peer is the initiator of room ' + room + '!');
+      this.isChannelReady = true;
+    });
+
+    socket.on('joined', (room) => {
+      console.log('joined: ' + room);
+      this.isChannelReady = true;
+    });
+    
+    socket.on('log', (array) => {
+      console.log.apply(console, array);
+    });
+
+    socket.on('ipaddr', (ipaddr) => {
+      console.log('Message from client: Server IP address is ' + ipaddr);
+    });
+
+    socket.on('message', (message) => {
+      console.log('Client received message:', message);
+      
+      if (message === 'got user media') {
+        this.maybeStart();
+      } else if (message.type === 'offer') {
+        if (!this.isInitiator && !this.isStarted) {
+          this.maybeStart();
+        }
+        this.pc.setRemoteDescription(new RTCSessionDescription(message));
+        this.doAnswer();
+      } else if (message.type === 'answer' && this.isStarted) {
+        this.pc.setRemoteDescription(new RTCSessionDescription(message));
+      } else if (message.type === 'candidate' && this.isStarted) {
+        var candidate = new RTCIceCandidate({
+          sdpMLineIndex: message.label,
+          candidate: message.candidate
+        });
+        this.pc.addIceCandidate(candidate);
+      } else if (message === 'bye' && this.isStarted) {
+        this.handleRemoteHangup();
+      }
+    })
   }
 
   toggleLocalStream = () => {
     if(this.localStream){
-      console.log('Message from client: Asking to join room ' + room);
-      socket.emit('create or join', this.state.roomId);
       this.localStream = null
       this.refLocalVideo.current.srcObject = this.localStream
     }else{
@@ -78,7 +141,7 @@ class PeerSignalComponent extends React.Component{
     if (!this.isStarted && typeof this.localStream !== 'undefined' && this.isChannelReady) {
       console.log('>>>>>> creating peer connection');
       this.createPeerConnection();
-      this.pc.addStream(localStream);
+      this.pc.addStream(this.localStream);
       this.isStarted = true;
       console.log('isInitiator', this.isInitiator);
       if (this.isInitiator) {
@@ -197,7 +260,17 @@ class PeerSignalComponent extends React.Component{
     this.pc = null;
   }
 
+  showConnectionStats = () => {
+    console.log('this is ', this)
+  }
+
+  joinRoom = () => {
+    console.log('Message from client: Asking to join room ' + this.state.roomId);
+    socket.emit('create or join', this.state.roomId);
+  }
+
   render(props){
+    const { classes } = this.props
     return(
       <div>
         <h1>
@@ -205,12 +278,20 @@ class PeerSignalComponent extends React.Component{
         </h1>
 
         <div>
-          <video ref={this.refLocalVideo} autoPlay muted /> 
-          <video ref={this.refRemoteVideo} autoPlay muted /> 
+          <video ref={this.refLocalVideo} autoPlay muted className={classes.video} /> 
+          <video ref={this.refRemoteVideo} autoPlay muted className={classes.video} /> 
         </div>
+
+        <button onClick={this.joinRoom}>
+          join room: &nbsp;{this.state.roomId}
+        </button>
 
         <button onClick={this.toggleLocalStream}>
           stream
+        </button>
+
+        <button onClick={this.showConnectionStats}>
+          showStats
         </button>
 
       </div>
@@ -219,4 +300,4 @@ class PeerSignalComponent extends React.Component{
 
 }
 
-export default PeerSignalComponent
+export default withStyles(styles)(PeerSignalComponent)
