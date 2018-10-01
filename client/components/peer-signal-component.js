@@ -1,4 +1,4 @@
-import React from 'React'
+import React from 'react'
 import socket, {socketRoomInit} from '../socket'
 import { withStyles } from '@material-ui/core/styles';
 
