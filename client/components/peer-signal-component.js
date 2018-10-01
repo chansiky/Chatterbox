@@ -55,6 +55,7 @@ class PeerSignalComponent extends React.Component{
       );
     }
     socketRoomInit(this)
+    this.joinRoom()
   }
 
   toggleLocalStream = () => {
@@ -224,9 +225,6 @@ class PeerSignalComponent extends React.Component{
           <video ref={this.refRemoteVideo} autoPlay muted className={classes.video} /> 
         </div>
 
-        <button onClick={this.joinRoom}>
-          join room: &nbsp;{this.state.roomId}
-        </button>
 
         <button onClick={this.toggleLocalStream}>
           stream
