@@ -145,7 +145,7 @@ class PeerSignalComponent extends React.Component{
     console.log('createOffer() error: ', event);
   }
 
-  requestTurn = (turnUrl) => {
+  requestTurn = (turnURL) => {
     var turnExists = false;
     for (let i in this.servers.iceServers) {
       if (this.servers.iceServers[i].urls.substring(0, 5) === 'turn:') {
