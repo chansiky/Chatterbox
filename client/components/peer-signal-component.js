@@ -1,5 +1,5 @@
 import React from 'React'
-import socket from '../socket'
+import socket, {socketRoomInit} from '../socket'
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
@@ -13,7 +13,6 @@ const sendMessage = (message) => {
   console.log('Client sending message: ', message);
   socket.emit('message', message);
 }
-
 
 class PeerSignalComponent extends React.Component{
   constructor(props){
@@ -55,63 +54,7 @@ class PeerSignalComponent extends React.Component{
         'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
       );
     }
-
-    this.initializeSocket()
-  }
-
-  initializeSocket = () => {
-
-    socket.on('created', (room) => {
-      console.log('Created room ' + room);
-      this.isInitiator = true;
-    });
-
-    socket.on('full', (room) => {
-      console.log('Room ' + room + ' is full');
-    });
-
-    socket.on('join', (room) => {
-      console.log('Another peer made a request to join room ' + room);
-      console.log('This peer is the initiator of room ' + room + '!');
-      this.isChannelReady = true;
-    });
-
-    socket.on('joined', (room) => {
-      console.log('joined: ' + room);
-      this.isChannelReady = true;
-    });
-    
-    socket.on('log', (array) => {
-      console.log.apply(console, array);
-    });
-
-    socket.on('ipaddr', (ipaddr) => {
-      console.log('Message from client: Server IP address is ' + ipaddr);
-    });
-
-    socket.on('message', (message) => {
-      console.log('Client received message:', message);
-      
-      if (message === 'got user media') {
-        this.maybeStart();
-      } else if (message.type === 'offer') {
-        if (!this.isInitiator && !this.isStarted) {
-          this.maybeStart();
-        }
-        this.pc.setRemoteDescription(new RTCSessionDescription(message));
-        this.doAnswer();
-      } else if (message.type === 'answer' && this.isStarted) {
-        this.pc.setRemoteDescription(new RTCSessionDescription(message));
-      } else if (message.type === 'candidate' && this.isStarted) {
-        var candidate = new RTCIceCandidate({
-          sdpMLineIndex: message.label,
-          candidate: message.candidate
-        });
-        this.pc.addIceCandidate(candidate);
-      } else if (message === 'bye' && this.isStarted) {
-        this.handleRemoteHangup();
-      }
-    })
+    socketRoomInit(this)
   }
 
   toggleLocalStream = () => {
@@ -149,7 +92,6 @@ class PeerSignalComponent extends React.Component{
       }
     }
   }
-
 
   doCall = () => {
     this.pc.createOffer(this.setLocalAndSendMessage, this.handleCreateOfferError);

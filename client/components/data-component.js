@@ -1,4 +1,5 @@
 import React from 'react'
+import {servers} from '../data'
 
 class DataComponent extends React.Component{
   constructor(props){
@@ -17,8 +18,6 @@ class DataComponent extends React.Component{
     this.servers = {
       iceServers: [{ url: 'stun:stun.l.google.com:19302' }]
     }
-
-    
   }
 
   state = {

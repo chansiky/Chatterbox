@@ -1,6 +1,3 @@
-/*
-https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Simple_RTCDataChannel_sample
-*/
 import React from 'react'
 
 class DataChat extends React.Component {
