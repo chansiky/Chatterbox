@@ -36,7 +36,7 @@ class PeerSignalComponent extends React.Component{
     this.refRemoteVideo = React.createRef()
 
     this.servers = {
-      iceServers: [{ url: 'stun:stun.l.google.com:19302' }]
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     }
     
     this.mediaConstraints = {
@@ -148,9 +148,6 @@ class PeerSignalComponent extends React.Component{
   requestTurn = (turnUrl) => {
     var turnExists = false;
     for (let i in this.servers.iceServers) {
-      console.log(i)
-      console.log(this.servers.iceServers)
-      console.log(this.servers.iceServers[i])
       if (this.servers.iceServers[i].urls.substring(0, 5) === 'turn:') {
         turnExists = true;
         this.turnReady = true;
