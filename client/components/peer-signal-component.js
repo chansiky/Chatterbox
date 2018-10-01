@@ -149,6 +149,8 @@ class PeerSignalComponent extends React.Component{
     var turnExists = false;
     for (let i in this.servers.iceServers) {
       console.log(i)
+      console.log(this.servers.iceServers)
+      console.log(this.servers.iceServers[i])
       if (this.servers.iceServers[i].urls.substr(0, 5) === 'turn:') {
         turnExists = true;
         this.turnReady = true;
