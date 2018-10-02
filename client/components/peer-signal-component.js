@@ -220,15 +220,19 @@ class PeerSignalComponent extends React.Component{
 
   render(props){
     const { classes } = this.props
-    const {redirectFullRoom} = this.state
+    const {redirectFullRoom, roomId} = this.state
 
     if(redirectFullRoom){
-      return <Redirect to='/' />
+      return <Redirect to={{
+        pathname: '/',
+        state: {fromRoom: `${roomId}`}
+        }}
+      />
     }
     return(
       <div>
         <h1>
-          Room: {this.state.roomId}
+          Room: {roomId}
         </h1>
 
         <div>

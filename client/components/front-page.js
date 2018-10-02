@@ -24,9 +24,15 @@ class FrontPage extends React.Component{
   }
   render(props){
     const { classes } = this.props
-  
+    let fromRoom
+    if(this.props.location.state){
+      fromRoom = this.props.location.state.fromRoom
+    }
+
+
     return(
       <div className={classes.flexContainer1}>
+        {(fromRoom) && <div> {fromRoom} is full </div>}
         <Typography variant='display3' className={classes.flexItem1}>
           drawRTC
         </Typography>
