@@ -32,7 +32,11 @@ class FrontPage extends React.Component{
 
     return(
       <div className={classes.flexContainer1}>
-        {(fromRoom) && <div> {fromRoom} is full </div>}
+        {(fromRoom) && 
+          <Typography>
+            room &quot;{fromRoom}&quot; is full 
+          </Typography>
+        }
         <Typography variant='display3' className={classes.flexItem1}>
           drawRTC
         </Typography>
