@@ -1,4 +1,5 @@
 import React from 'react'
+import {Redirect} from 'react-router'
 import socket, {socketRoomInit} from '../socket'
 import { withStyles } from '@material-ui/core/styles';
 
@@ -29,7 +30,8 @@ class PeerSignalComponent extends React.Component{
     this.turnReady = false;
 
     this.state = {
-      roomId: props.match.params.roomId
+      roomId: props.match.params.roomId,
+      redirectFullRoom: false
     }
 
     this.refLocalVideo = React.createRef()
@@ -212,12 +214,21 @@ class PeerSignalComponent extends React.Component{
     socket.emit('create or join', this.state.roomId);
   }
 
+  fullRoom = () => {
+    this.setState({redirectFullRoom: 'true'})
+  }
+
   render(props){
     const { classes } = this.props
+    const {redirectFullRoom} = this.state
+
+    if(redirectFullRoom){
+      return <Redirect to='/' />
+    }
     return(
       <div>
         <h1>
-          This is a realTime communication using WebRTC
+          Room: {this.state.roomId}
         </h1>
 
         <div>
