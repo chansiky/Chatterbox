@@ -21,7 +21,7 @@ const styles = {
   },
   flexItem1BlankSpace: {
     display: 'block',
-    height: '200px',
+    height: '20vh',
   },
   brushIcon: {
     color: green[800], 
