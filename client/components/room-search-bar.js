@@ -9,10 +9,13 @@ import {withStyles} from '@material-ui/core/styles'
 const styles = theme => ({
   formContainer:{
     display: 'flex', 
-    flexWrap: 'wrap',
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
+    margin: 0,
+    padding: 0,
+    border: 0,
+    color: 'secondary',
   }, 
   textField: {
     width: 400,
@@ -28,21 +31,32 @@ class RoomSearchBar extends React.Component{
   state={
     error: false,
     roomField: '',
+    textFieldLabel: '     Enter room name',
   }
   
   handleTextFieldChange = (event) => {
     this.setState({
-      [event.target.name] : event.target.value
+      [event.target.name] : event.target.value,
+      textFieldLabel: "Enter room name",
+      error: false,
     })
   }
 
   handleSubmit = (event) => {
     event.preventDefault()
-    history.push(`/peer/${this.state.roomField}`)
+    if(this.state.roomField === ''){
+      this.setState({
+        error: true,
+        textFieldLabel: "     Room name must be provided",
+    })
+    }else{
+      history.push(`/peer/${this.state.roomField}`)
+    }
   }
 
   render(props){
     const { classes } = this.props
+    const nbsp = "        "
 
     return(
       <React.Fragment>
@@ -58,8 +72,10 @@ class RoomSearchBar extends React.Component{
             placeholder="Johns_Room"
             className={classes.textField}
             margin="normal"
+            fullWidth={true}
+            color="secondary"
           />
-          <Button label="Submit" type="submit" variant="outlined" className={classes.button}>
+          <Button label="Submit" type="submit" variant="outlined" color="default" className={classes.button}>
             submit
           </Button>
         </form>
