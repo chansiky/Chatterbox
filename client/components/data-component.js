@@ -7,8 +7,8 @@ class DataComponent extends React.Component{
 
     this.dataChannelSend = null
 
-    this.remoteConnection = null
-    this.sendChannel  = null
+    this.remotePC = null //peer connection
+    this.sendChannel  = null  //datachannel = event.channel
     this.receiveChannel = null
     this.pcConstraint = null
     this.dataConstraint = null
@@ -50,25 +50,25 @@ class DataComponent extends React.Component{
     this.pcConstraint = null;
     this.dataConstraint = null;
 
-    this.localConnection =
+    this.localPC =
         new RTCPeerConnection(servers, this.pcConstraint);
   
-    this.sendChannel = this.localConnection.createDataChannel('sendDataChannel',
+    this.sendChannel = this.localPC.createDataChannel('sendDataChannel',
         this.dataConstraint);
   
-    this.localConnection.onicecandidate = this.iceCallback1;
+    this.localPC.onicecandidate = this.iceCallback1;
     this.sendChannel.onopen = this.onSendChannelStateChange;
     this.sendChannel.onclose = this.onSendChannelStateChange;
   
-    // Add remoteConnection to global scope to make it visible
+    // Add remotePC to global scope to make it visible
     // from the browser console.
-    this.remoteConnection =
+    this.remotePC =
         new RTCPeerConnection(servers, this.pcConstraint);
   
-    this.remoteConnection.onicecandidate = this.iceCallback2;
-    this.remoteConnection.ondatachannel = this.receiveChannelCallback;
+    this.remotePC.onicecandidate = this.iceCallback2;
+    this.remotePC.ondatachannel = this.receiveChannelCallback;
   
-    this.localConnection.createOffer().then(
+    this.localPC.createOffer().then(
       this.gotDescription1
     );
     
@@ -86,10 +86,10 @@ class DataComponent extends React.Component{
   closeDataChannels = () => {
     this.sendChannel.close();
     this.receiveChannel.close();
-    this.localConnection.close();
-    this.remoteConnection.close();
-    this.localConnection = null;
-    this.remoteConnection = null;
+    this.localPC.close();
+    this.remotePC.close();
+    this.localPC = null;
+    this.remotePC = null;
 
 
     this.setState({
@@ -114,7 +114,7 @@ class DataComponent extends React.Component{
 
   iceCallback1 = (event) => {
     if (event.candidate) {
-      this.remoteConnection.addIceCandidate(
+      this.remotePC.addIceCandidate(
         event.candidate
       ).then(
         this.onAddIceCandidateSuccess,
@@ -125,7 +125,7 @@ class DataComponent extends React.Component{
 
   iceCallback2 = (event) => {
     if (event.candidate) {
-      this.localConnection.addIceCandidate(
+      this.localPC.addIceCandidate(
         event.candidate
       ).then(
         this.onAddIceCandidateSuccess,
@@ -133,7 +133,6 @@ class DataComponent extends React.Component{
       );
     }
   }
-
 
   onSendChannelStateChange = () => {
     var readyState = this.sendChannel.readyState;
@@ -189,17 +188,16 @@ class DataComponent extends React.Component{
   }
 
   gotDescription1 = (desc) => {
-    this.localConnection.setLocalDescription(desc);
-    this.remoteConnection.setRemoteDescription(desc);
-    this.remoteConnection.createAnswer().then(
+    this.localPC.setLocalDescription(desc);
+    this.remotePC.setRemoteDescription(desc);
+    this.remotePC.createAnswer().then(
       this.gotDescription2
     );
   }
 
-
   gotDescription2 = (desc) => {
-    this.remoteConnection.setLocalDescription(desc);
-    this.localConnection.setRemoteDescription(desc);
+    this.remotePC.setLocalDescription(desc);
+    this.localPC.setRemoteDescription(desc);
   }
 
   render(){

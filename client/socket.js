@@ -37,23 +37,23 @@ export const socketRoomInit = (roomComponent) => {
     console.log('Client received message:', message);
 
     if (message === 'got user media') {
-    roomComponent.maybeStart();
+      roomComponent.maybeStart();
     } else if (message.type === 'offer') {
-    if (!roomComponent.isInitiator && !roomComponent.isStarted) {
-    roomComponent.maybeStart();
+      if (!roomComponent.isInitiator && !roomComponent.isStarted) {
+        roomComponent.maybeStart();
     }
-    roomComponent.pc.setRemoteDescription(new RTCSessionDescription(message));
-    roomComponent.doAnswer();
+      roomComponent.pc.setRemoteDescription(new RTCSessionDescription(message));
+      roomComponent.doAnswer();
     } else if (message.type === 'answer' && roomComponent.isStarted) {
-    roomComponent.pc.setRemoteDescription(new RTCSessionDescription(message));
+      roomComponent.pc.setRemoteDescription(new RTCSessionDescription(message));
     } else if (message.type === 'candidate' && roomComponent.isStarted) {
-    var candidate = new RTCIceCandidate({
-      sdpMLineIndex: message.label,
-      candidate: message.candidate
-    });
-    roomComponent.pc.addIceCandidate(candidate);
+      var candidate = new RTCIceCandidate({
+        sdpMLineIndex: message.label,
+        candidate: message.candidate
+      });
+      roomComponent.pc.addIceCandidate(candidate);
     } else if (message === 'bye' && roomComponent.isStarted) {
-    roomComponent.handleRemoteHangup();
+      roomComponent.handleRemoteHangup();
     }
   })
 }
