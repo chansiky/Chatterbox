@@ -3,6 +3,7 @@ import {Redirect} from 'react-router'
 import socket, {socketRoomInit} from '../socket'
 import { withStyles } from '@material-ui/core/styles'
 import {servers} from '../data'
+import { CanvasRTC } from './index'
 
 const styles = {
   root: {
@@ -175,7 +176,6 @@ class PeerSignalComponent extends React.Component{
     const readyState = this.receiveChannel.readyState;
   }
 
-
   closePeerConnection = () => {
     this.localStream = null
     this.refLocalVideo.current.srcObject = this.localStream
@@ -346,6 +346,8 @@ class PeerSignalComponent extends React.Component{
           this.state.receiveValues.map(value => <h5> {value} </h5>)
         }
         </div>
+
+        <CanvasRTC />
 
         <div id="buttons">
           <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
