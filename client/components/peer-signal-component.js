@@ -30,7 +30,7 @@ class PeerSignalComponent extends React.Component{
 
     this.localStream = undefined
     this.remoteStream = undefined
-    this.sendChannel = undefined
+    this.dataChannel = undefined
 
     this.pc = undefined
 
@@ -74,11 +74,10 @@ class PeerSignalComponent extends React.Component{
     }
     socketRoomInit(this)
     this.joinRoom()
+    this.mediaStartAndInitiate()
   }
 
-  openConnection = async () => {
-    this.getUserMedia()
-
+  mediaStartAndInitiate = async () => {
     this.localStream = await navigator.mediaDevices.getUserMedia(this.mediaConstraints)
     sendMessage('got user media');
     this.refLocalVideo.current.srcObject = this.localStream
@@ -86,16 +85,6 @@ class PeerSignalComponent extends React.Component{
     if (this.Initiator) {
       this.maybeStart();
     }
-
-    this.setState({
-      disabled: {
-        ...this.state.disabled, 
-        textBox: false,
-        sendButton : false,
-        startButton : true,
-        closeButton : false,
-      }
-    })
   }
 
   maybeStart = () => {
@@ -115,13 +104,15 @@ class PeerSignalComponent extends React.Component{
   createPeerConnection = () => {
     try {
       this.pc = new RTCPeerConnection(null);
-      this.sendChannel = this.pc.createDataChannel('sendDataChannel', this.dataConstraint)
 
       this.pc.onicecandidate = this.handleIceCandidate;
-      this.pc.ondatachannel  = this.receiveChannelCallback;
-
       this.pc.onaddstream    = this.handleRemoteStreamAdded;
       this.pc.onremovestream = this.handleRemoteStreamRemoved;
+      this.pc.ondatachannel  = this.dataChannelCallback;
+
+      this.dataChannel = this.pc.createDataChannel('sendDataChannel', this.dataConstraint)
+      this.dataChannel.onopen = this.onDataChannelStateChange;
+      this.dataChannel.onclose = this.onDataChannelStateChange;
     } catch (e) {
       alert('Cannot create RTCPeerConnection object.');
       return;
@@ -132,8 +123,8 @@ class PeerSignalComponent extends React.Component{
     this.pc.createOffer(this.setLocalAndSendMessage, this.handleCreateOfferError);
   }
 
-  onSendChannelStateChange = () => {
-    var readyState = this.sendChannel.readyState;
+  onDataChannelStateChange = () => {
+    var readyState = this.dataChannel.readyState;
     if (readyState === 'open') {
       this.setState({
         disabled: {
@@ -155,17 +146,17 @@ class PeerSignalComponent extends React.Component{
   }
 
 
-  closeDataChannels = () => {
-    this.sendChannel.close();
-    this.receiveChannel.close();
-    this.localPC.close();
-    this.remotePC.close();
-    this.localPC = null;
-    this.remotePC = null;
-
+  closePeerConnection = () => {
     this.localStream = null
     this.refLocalVideo.current.srcObject = this.localStream
-    this.hangup()
+    
+    this.isStarted = false;
+    this.dataChannel.close();
+    this.pc.close();
+    this.pc = null;
+
+    sendMessage('bye');
+    this.isInitiator = false;
 
     this.setState({
       textBox: '',
@@ -183,7 +174,7 @@ class PeerSignalComponent extends React.Component{
   sendData = () => {
     console.log('this.state.textBox is: ', this.state.textBox)
     const data = this.state.textBox
-    this.sendChannel.send(data);
+    this.dataChannel.send(data);
   }
 
 
@@ -196,7 +187,7 @@ class PeerSignalComponent extends React.Component{
   }
 
 
-  receiveChannelCallback = (event) => {
+  dataChannelCallback = (event) => {
     this.receiveChannel           = event.channel;
     this.receiveChannel.onmessage = this.onReceiveMessageCallback;
     this.receiveChannel.onopen    = this.onReceiveChannelStateChange;
@@ -205,9 +196,12 @@ class PeerSignalComponent extends React.Component{
 
   onReceiveMessageCallback = (event) => {
     this.setState({
-      textBox: '',
       receiveValues: [...this.state.receiveValues, event.data]
     })
+  }
+
+  onReceiveChannelStateChange = () => {
+    const readyState = this.receiveChannel.readyState;
   }
 
   handleIceCandidate = (event) => {
@@ -277,18 +271,6 @@ class PeerSignalComponent extends React.Component{
     trace('Failed to create session description: ' + error.toString());
   }
 
-  hangup = () => {
-    console.log('Hanging up.');
-    this.stop();
-    sendMessage('bye');
-    this.isInitiator = false;
-  }
-  
-  stop = () => {
-    this.isStarted = false;
-    this.pc.close();
-    this.pc = null;
-  }
 
   showThis = () => {
     console.log('this is ', this)
@@ -351,7 +333,7 @@ class PeerSignalComponent extends React.Component{
 
         <div id="buttons">
           <button id="startButton" disabled={this.state.disabled.startButton} onClick ={this.openConnection} >Start</button>
-          <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closeDataChannels} >Stop</button>
+          <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
         </div>
       </div>
     )
