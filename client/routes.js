@@ -5,7 +5,8 @@ import PropTypes from 'prop-types'
 import {
   FrontPage, 
   RoomSignalComponent, 
-  PeerSignalComponent
+  PeerSignalComponent,
+  DataComponent
   } from './components'
 import {me} from './store'
 
@@ -20,6 +21,7 @@ class Routes extends Component {
       <Switch>
         <Route path="/peer/:roomId" component={PeerSignalComponent} />
         <Route path="/room/:roomId" component={RoomSignalComponent} />
+        <Route exact path='/data' component={DataComponent} />
         <Route exact path='/' component={FrontPage} />
       </Switch>
     )

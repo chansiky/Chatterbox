@@ -1,12 +1,21 @@
 import React from 'react'
 import {Redirect} from 'react-router'
 import socket, {socketRoomInit} from '../socket'
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles'
+import {servers} from '../data'
 
 const styles = {
   video: {
-    height: 50, 
-    width: 75,
+    height: 150, 
+    width: 200,
+  },
+  local: {
+    borderStyle: 'solid',
+    borderColor: 'red',
+  },
+  remote: {
+    borderStyle: 'solid',
+    borderColor: 'black',
   }
 };
 
@@ -21,6 +30,7 @@ class PeerSignalComponent extends React.Component{
 
     this.localStream = undefined
     this.remoteStream = undefined
+    this.sendChannel = undefined
 
     this.pc = undefined
 
@@ -28,19 +38,25 @@ class PeerSignalComponent extends React.Component{
     this.isInitiator = false;
     this.isStarted = false;
     this.turnReady = false;
+    this.dataConstraint = null;
 
     this.state = {
       roomId: props.match.params.roomId,
-      redirectFullRoom: false
+      redirectFullRoom: false,
+      textBox: '',
+      receiveValues: [],
+      disabled: {
+        textBox: true,
+        sendButton: true, 
+        startButton: false,
+        closeButton: true,
+      }
     }
 
     this.refLocalVideo = React.createRef()
     this.refRemoteVideo = React.createRef()
+    this.refTextBox = React.createRef()
 
-    this.servers = {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-    }
-    
     this.mediaConstraints = {
       audio: true,
       video: true,
@@ -60,26 +76,26 @@ class PeerSignalComponent extends React.Component{
     this.joinRoom()
   }
 
-  toggleLocalStream = () => {
-    if(this.localStream){
-      this.localStream = null
-      this.refLocalVideo.current.srcObject = this.localStream
-    }else{
-      this.getUserMedia()
-    }
-  }
+  openConnection = async () => {
+    this.getUserMedia()
 
-  async getUserMedia(){
-    try{
-      this.localStream = await navigator.mediaDevices.getUserMedia(this.mediaConstraints)
-      this.refLocalVideo.current.srcObject = this.localStream
-      sendMessage('got user media');
-      if (this.Initiator) {
-        this.maybeStart();
-      }
-    }catch(err){
-      console.error(err)
+    this.localStream = await navigator.mediaDevices.getUserMedia(this.mediaConstraints)
+    sendMessage('got user media');
+    this.refLocalVideo.current.srcObject = this.localStream
+
+    if (this.Initiator) {
+      this.maybeStart();
     }
+
+    this.setState({
+      disabled: {
+        ...this.state.disabled, 
+        textBox: false,
+        sendButton : false,
+        startButton : true,
+        closeButton : false,
+      }
+    })
   }
 
   maybeStart = () => {
@@ -95,10 +111,81 @@ class PeerSignalComponent extends React.Component{
       }
     }
   }
+  
+  createPeerConnection = () => {
+    try {
+      this.pc = new RTCPeerConnection(null);
+      this.sendChannel = this.pc.createDataChannel('sendDataChannel', this.dataConstraint)
+
+      this.pc.onicecandidate = this.handleIceCandidate;
+      this.pc.ondatachannel  = this.receiveChannelCallback;
+
+      this.pc.onaddstream    = this.handleRemoteStreamAdded;
+      this.pc.onremovestream = this.handleRemoteStreamRemoved;
+    } catch (e) {
+      alert('Cannot create RTCPeerConnection object.');
+      return;
+    }
+  }
 
   doCall = () => {
     this.pc.createOffer(this.setLocalAndSendMessage, this.handleCreateOfferError);
   }
+
+  onSendChannelStateChange = () => {
+    var readyState = this.sendChannel.readyState;
+    if (readyState === 'open') {
+      this.setState({
+        disabled: {
+          textBox : false,
+          sendButton : false,
+          closeButton : false,
+        }
+      })
+      this.refTextBox.current.focus();
+    } else {
+      this.setState({
+        disabled: {
+          textBox     : true,
+          sendButton  : true,
+          closeButton : true,
+        }
+      })
+    }
+  }
+
+
+  closeDataChannels = () => {
+    this.sendChannel.close();
+    this.receiveChannel.close();
+    this.localPC.close();
+    this.remotePC.close();
+    this.localPC = null;
+    this.remotePC = null;
+
+    this.localStream = null
+    this.refLocalVideo.current.srcObject = this.localStream
+    this.hangup()
+
+    this.setState({
+      textBox: '',
+      receiveValues: [],
+      disabled: {
+        ...this.state.disabled, 
+        textBox : false,
+        startButton : false,
+        sendButton  : true,
+        closeButton : true,
+      }
+    })
+  }
+
+  sendData = () => {
+    console.log('this.state.textBox is: ', this.state.textBox)
+    const data = this.state.textBox
+    this.sendChannel.send(data);
+  }
+
 
   doAnswer = () => {
     console.log('Sending answer to peer.');
@@ -108,16 +195,19 @@ class PeerSignalComponent extends React.Component{
     );
   }
 
-  createPeerConnection = () => {
-    try {
-      this.pc = new RTCPeerConnection(null);
-      this.pc.onicecandidate = this.handleIceCandidate;
-      this.pc.onaddstream    = this.handleRemoteStreamAdded;
-      this.pc.onremovestream = this.handleRemoteStreamRemoved;
-    } catch (e) {
-      alert('Cannot create RTCPeerConnection object.');
-      return;
-    }
+
+  receiveChannelCallback = (event) => {
+    this.receiveChannel           = event.channel;
+    this.receiveChannel.onmessage = this.onReceiveMessageCallback;
+    this.receiveChannel.onopen    = this.onReceiveChannelStateChange;
+    this.receiveChannel.onclose   = this.onReceiveChannelStateChange;
+  }
+
+  onReceiveMessageCallback = (event) => {
+    this.setState({
+      textBox: '',
+      receiveValues: [...this.state.receiveValues, event.data]
+    })
   }
 
   handleIceCandidate = (event) => {
@@ -150,8 +240,8 @@ class PeerSignalComponent extends React.Component{
 
   requestTurn = (turnURL) => {
     var turnExists = false;
-    for (let i in this.servers.iceServers) {
-      if (this.servers.iceServers[i].urls.substring(0, 5) === 'turn:') {
+    for (let i in servers.iceServers) {
+      if (servers.iceServers[i].urls.substring(0, 5) === 'turn:') {
         turnExists = true;
         this.turnReady = true;
         break;
@@ -165,7 +255,7 @@ class PeerSignalComponent extends React.Component{
         if (xhr.readyState === 4 && xhr.status === 200) {
           var turnServer = JSON.parse(xhr.responseText);
           console.log('Got TURN server: ', turnServer);
-          this.servers.iceServers.push({
+          servers.iceServers.push({
             'urls': 'turn:' + turnServer.username + '@' + turnServer.turn,
             'credential': turnServer.password
           });
@@ -190,12 +280,7 @@ class PeerSignalComponent extends React.Component{
   hangup = () => {
     console.log('Hanging up.');
     this.stop();
-    this.sendMessage('bye');
-  }
-  
-  handleRemoteHangup = () => {
-    console.log('Session terminated.');
-    this.stop();
+    sendMessage('bye');
     this.isInitiator = false;
   }
   
@@ -205,7 +290,7 @@ class PeerSignalComponent extends React.Component{
     this.pc = null;
   }
 
-  showConnectionStats = () => {
+  showThis = () => {
     console.log('this is ', this)
   }
 
@@ -217,6 +302,13 @@ class PeerSignalComponent extends React.Component{
   fullRoom = () => {
     this.setState({redirectFullRoom: 'true'})
   }
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name] : event.target.value
+    })
+  }
+
 
   render(props){
     const { classes } = this.props
@@ -236,19 +328,31 @@ class PeerSignalComponent extends React.Component{
         </h1>
 
         <div>
-          <video ref={this.refLocalVideo} autoPlay muted className={classes.video} /> 
-          <video ref={this.refRemoteVideo} autoPlay muted className={classes.video} /> 
+          <video ref={this.refLocalVideo} autoPlay muted className={`${classes.video} ${classes.local}`} /> 
+          <video ref={this.refRemoteVideo} autoPlay muted className={`${classes.video} ${classes.remote}`} /> 
         </div>
 
+        <form >
+           <label >
+             chat:
+             <input name="textBox" ref={this.refTextBox} type="text" disabled={this.state.disabled.textBox} value={this.state.textBox} onChange={this.handleChange} />
+           </label>
+           <button id="sendButton"  disabled={this.state.disabled.sendButton} onClick ={this.sendData} >Send</button>
+        </form>
+        <div>
+        {
+          this.state.receiveValues.map(value => <h5> {value} </h5>)
+        }
+        </div>
 
-        <button onClick={this.toggleLocalStream}>
-          stream
+        <button onClick={this.showThis}>
+          console log this
         </button>
 
-        <button onClick={this.showConnectionStats}>
-          showStats
-        </button>
-
+        <div id="buttons">
+          <button id="startButton" disabled={this.state.disabled.startButton} onClick ={this.openConnection} >Start</button>
+          <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closeDataChannels} >Stop</button>
+        </div>
       </div>
     )
   }
