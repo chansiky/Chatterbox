@@ -5,6 +5,16 @@ import { withStyles } from '@material-ui/core/styles'
 import {servers} from '../data'
 
 const styles = {
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  videoContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   video: {
     height: 150, 
     width: 200,
@@ -43,10 +53,10 @@ class PeerSignalComponent extends React.Component{
     this.state = {
       roomId: props.match.params.roomId,
       redirectFullRoom: false,
-      textBox: '',
+      chatBox: '',
       receiveValues: [],
       disabled: {
-        textBox: true,
+        chatBox: true,
         sendButton: true, 
         startButton: false,
         closeButton: true,
@@ -108,19 +118,17 @@ class PeerSignalComponent extends React.Component{
       this.pc.onicecandidate = this.handleIceCandidate;
       this.pc.onaddstream    = this.handleRemoteStreamAdded;
       this.pc.onremovestream = this.handleRemoteStreamRemoved;
-      this.pc.ondatachannel  = this.dataChannelCallback;
 
       this.dataChannel = this.pc.createDataChannel('sendDataChannel', this.dataConstraint)
+      this.dataChannel.onmessage = this.onSendMessageCallback;
       this.dataChannel.onopen = this.onDataChannelStateChange;
       this.dataChannel.onclose = this.onDataChannelStateChange;
+
+      this.pc.ondatachannel  = this.dataChannelCallback;
     } catch (e) {
       alert('Cannot create RTCPeerConnection object.');
       return;
     }
-  }
-
-  doCall = () => {
-    this.pc.createOffer(this.setLocalAndSendMessage, this.handleCreateOfferError);
   }
 
   onDataChannelStateChange = () => {
@@ -128,7 +136,7 @@ class PeerSignalComponent extends React.Component{
     if (readyState === 'open') {
       this.setState({
         disabled: {
-          textBox : false,
+          chatBox : false,
           sendButton : false,
           closeButton : false,
         }
@@ -137,12 +145,34 @@ class PeerSignalComponent extends React.Component{
     } else {
       this.setState({
         disabled: {
-          textBox     : true,
+          chatBox     : true,
           sendButton  : true,
           closeButton : true,
         }
       })
     }
+  }
+
+  dataChannelCallback = (RTCDataChannelEvent) => {
+    this.receiveChannel           = RTCDataChannelEvent.channel;
+    this.receiveChannel.onmessage = this.onReceiveMessageCallback;
+    this.receiveChannel.onopen    = this.onReceiveChannelStateChange;
+    this.receiveChannel.onclose   = this.onReceiveChannelStateChange;
+  }
+
+
+  onSendMessageCallback = (event) => {
+    console.log(event.data)
+  }
+
+  onReceiveMessageCallback = (event) => {
+    this.setState({
+      receiveValues: [...this.state.receiveValues, event.data]
+    })
+  }
+
+  onReceiveChannelStateChange = () => {
+    const readyState = this.receiveChannel.readyState;
   }
 
 
@@ -159,11 +189,11 @@ class PeerSignalComponent extends React.Component{
     this.isInitiator = false;
 
     this.setState({
-      textBox: '',
+      chatBox: '',
       receiveValues: [],
       disabled: {
         ...this.state.disabled, 
-        textBox : false,
+        chatBox : false,
         startButton : false,
         sendButton  : true,
         closeButton : true,
@@ -171,12 +201,21 @@ class PeerSignalComponent extends React.Component{
     })
   }
 
-  sendData = () => {
-    console.log('this.state.textBox is: ', this.state.textBox)
-    const data = this.state.textBox
-    this.dataChannel.send(data);
+  sendChatMessage = () => {
+    
+    if(this.state.texxtBox !== ""){
+      const data = this.state.chatBox
+      this.dataChannel.send(data);
+      this.setState({
+        chatBox: '',
+        receiveValues: [...this.state.receiveValues, this.state.chatBox]
+      })
+    }
   }
 
+  doCall = () => {
+    this.pc.createOffer(this.setLocalAndSendMessage, this.handleCreateOfferError);
+  }
 
   doAnswer = () => {
     console.log('Sending answer to peer.');
@@ -184,24 +223,6 @@ class PeerSignalComponent extends React.Component{
       this.setLocalAndSendMessage,
       this.onCreateSessionDescriptionError
     );
-  }
-
-
-  dataChannelCallback = (event) => {
-    this.receiveChannel           = event.channel;
-    this.receiveChannel.onmessage = this.onReceiveMessageCallback;
-    this.receiveChannel.onopen    = this.onReceiveChannelStateChange;
-    this.receiveChannel.onclose   = this.onReceiveChannelStateChange;
-  }
-
-  onReceiveMessageCallback = (event) => {
-    this.setState({
-      receiveValues: [...this.state.receiveValues, event.data]
-    })
-  }
-
-  onReceiveChannelStateChange = () => {
-    const readyState = this.receiveChannel.readyState;
   }
 
   handleIceCandidate = (event) => {
@@ -271,11 +292,6 @@ class PeerSignalComponent extends React.Component{
     trace('Failed to create session description: ' + error.toString());
   }
 
-
-  showThis = () => {
-    console.log('this is ', this)
-  }
-
   joinRoom = () => {
     console.log('Message from client: Asking to join room ' + this.state.roomId);
     socket.emit('create or join', this.state.roomId);
@@ -291,6 +307,10 @@ class PeerSignalComponent extends React.Component{
     })
   }
 
+  handleChatSubmit = (event) => {
+    event.preventDefault()
+    this.sendChatMessage()
+  }
 
   render(props){
     const { classes } = this.props
@@ -304,22 +324,22 @@ class PeerSignalComponent extends React.Component{
       />
     }
     return(
-      <div>
+      <div className={classes.root}>
         <h1>
           Room: {roomId}
         </h1>
 
-        <div>
+        <div className={classes.videoContainer}>
           <video ref={this.refLocalVideo} autoPlay muted className={`${classes.video} ${classes.local}`} /> 
           <video ref={this.refRemoteVideo} autoPlay muted className={`${classes.video} ${classes.remote}`} /> 
         </div>
 
-        <form >
+        <form onSubmit={this.handleChatSubmit}>
            <label >
              chat:
-             <input name="textBox" ref={this.refTextBox} type="text" disabled={this.state.disabled.textBox} value={this.state.textBox} onChange={this.handleChange} />
+             <input name="chatBox" ref={this.refTextBox} type="text" disabled={this.state.disabled.chatBox} value={this.state.chatBox} onChange={this.handleChange} />
            </label>
-           <button id="sendButton"  disabled={this.state.disabled.sendButton} onClick ={this.sendData} >Send</button>
+           <input value="send" type="submit" disabled={this.state.disabled.chatBox} />
         </form>
         <div>
         {
@@ -327,12 +347,7 @@ class PeerSignalComponent extends React.Component{
         }
         </div>
 
-        <button onClick={this.showThis}>
-          console log this
-        </button>
-
         <div id="buttons">
-          <button id="startButton" disabled={this.state.disabled.startButton} onClick ={this.openConnection} >Start</button>
           <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
         </div>
       </div>
