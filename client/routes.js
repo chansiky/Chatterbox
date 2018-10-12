@@ -6,7 +6,8 @@ import {
   FrontPage, 
   RoomSignalComponent, 
   PeerSignalComponent,
-  DataComponent
+  DataComponent,
+  Canvas
   } from './components'
 import {me} from './store'
 
@@ -21,6 +22,8 @@ class Routes extends Component {
       <Switch>
         <Route path="/peer/:roomId" component={PeerSignalComponent} />
         <Route path="/room/:roomId" component={RoomSignalComponent} />
+        <Route path="/canvas" component={Canvas} />
+  
         <Route exact path='/data' component={DataComponent} />
         <Route exact path='/' component={FrontPage} />
       </Switch>

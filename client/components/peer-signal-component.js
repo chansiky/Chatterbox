@@ -3,7 +3,7 @@ import {Redirect} from 'react-router'
 import socket, {socketRoomInit} from '../socket'
 import { withStyles } from '@material-ui/core/styles'
 import {servers} from '../data'
-import { CanvasRTC } from './index'
+import { Canvas } from './index'
 
 const styles = {
   root: {
@@ -347,7 +347,7 @@ class PeerSignalComponent extends React.Component{
         }
         </div>
 
-        <CanvasRTC />
+        <Canvas />
 
         <div id="buttons">
           <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>

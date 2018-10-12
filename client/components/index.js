@@ -1,6 +1,6 @@
 export {default as FrontPage} from './front-page'
 export {default as RoomSearchBar} from './room-search-bar'
-export {default as CanvasRTC} from './canvas-webRTC'
+export {default as Canvas} from './canvas-webRTC'
 export {default as DataComponent} from './data-component'
 export {default as RoomSignalComponent} from './room-signal-component'
 export {default as PeerSignalComponent} from './peer-signal-component'
