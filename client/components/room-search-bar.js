@@ -18,7 +18,7 @@ const styles = theme => ({
     color: 'secondary',
   }, 
   textField: {
-    width: 400,
+    width: 350,
   },
 })
 

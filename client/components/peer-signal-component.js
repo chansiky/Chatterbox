@@ -27,8 +27,16 @@ const styles = {
   remote: {
     borderStyle: 'solid',
     borderColor: 'black',
+  },
+  canvas: {
+    borderStyle: 'solid',
+    borderColor: 'black',
+    borderWidth: 'thin', 
   }
 };
+
+const CHAT = "CHAT"
+const DRAW = "DRAW"
 
 const sendMessage = (message) => {
   console.log('Client sending message: ', message);
@@ -63,10 +71,12 @@ class PeerSignalComponent extends React.Component{
         closeButton: true,
       }
     }
+    this.broadcastRTC   = this.broadcastRTC.bind(this)
 
-    this.refLocalVideo = React.createRef()
+    this.refLocalVideo  = React.createRef()
     this.refRemoteVideo = React.createRef()
-    this.refTextBox = React.createRef()
+    this.refTextBox     = React.createRef()
+    this.refCanvas      = React.createRef()
 
     this.mediaConstraints = {
       audio: true,
@@ -167,9 +177,21 @@ class PeerSignalComponent extends React.Component{
   }
 
   onReceiveMessageCallback = (event) => {
-    this.setState({
-      receiveValues: [...this.state.receiveValues, event.data]
-    })
+    const data = JSON.parse(event.data)
+    console.log('onReceiveMessageCallback event is:', data)
+    switch(data.type){
+      case CHAT:
+        this.setState({
+          receiveValues: [...this.state.receiveValues, data.value]
+        })
+        break
+      case DRAW:
+        const drawValues = data.value
+        this.refCanvas.current.draw(drawValues.start, drawValues.end, drawValues.strokeColor, false)
+        break
+      default :
+        break
+    }
   }
 
   onReceiveChannelStateChange = () => {
@@ -202,14 +224,23 @@ class PeerSignalComponent extends React.Component{
   }
 
   sendChatMessage = () => {
-    
-    if(this.state.texxtBox !== ""){
+    if(this.state.chatBox !== ""){
       const data = this.state.chatBox
-      this.dataChannel.send(data);
+      
+      this.broadcastRTC(CHAT, data)
+
       this.setState({
         chatBox: '',
         receiveValues: [...this.state.receiveValues, this.state.chatBox]
       })
+    }
+  }
+
+  broadcastRTC(type, value){
+    const data = JSON.stringify({type: type, value: value});
+    console.log('broadcasting: ', data)
+    if (this.dataChannel){
+      this.dataChannel.send(data);
     }
   }
 
@@ -347,7 +378,7 @@ class PeerSignalComponent extends React.Component{
         }
         </div>
 
-        <Canvas />
+        <Canvas className={classes.canvas} ref={this.refCanvas} funcBroadcastRTC={this.broadcastRTC} />
 
         <div id="buttons">
           <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
@@ -355,7 +386,6 @@ class PeerSignalComponent extends React.Component{
       </div>
     )
   }
-
 }
 
 export default withStyles(styles)(PeerSignalComponent)

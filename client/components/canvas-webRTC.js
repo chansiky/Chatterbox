@@ -1,16 +1,6 @@
 import React from 'react'
 import { EventEmitter } from 'events'
-export const events = new EventEmitter()
 import { connect } from 'react-redux'
-import { withStyles } from '@material-ui/core/styles'
-
-const styles = {
-  canvas: {
-    borderStyle: 'solid',
-    borderColor: 'black',
-    borderWidth: 'thin'
-  }
-}
 
 class Canvas extends React.Component{
   constructor(){
@@ -53,7 +43,6 @@ class Canvas extends React.Component{
     }
   }
 
-
   draw(start, end, strokeColor = 'black', shouldBroadcast = true) {
     this.ctx.beginPath()
     this.ctx.strokeStyle = this.state.strokeColor
@@ -61,10 +50,13 @@ class Canvas extends React.Component{
     this.ctx.lineTo(end.x, end.y)
     this.ctx.closePath()
     this.ctx.stroke()
+    if(shouldBroadcast){
+      console.log('broadcasting')
+      this.props.funcBroadcastRTC("DRAW",{start, end, strokeColor})
+    }
   }
 
   setupCanvas() {
-
     console.log('setting up canvas')
     this.ctx.lineWidth = 2
     this.ctx.lineJoin = 'round'
@@ -113,24 +105,18 @@ class Canvas extends React.Component{
     const { classes } = this.props
     return (
       <div>
-          <div ref={this.divThing} >
-            Title
-          </div>
-          <div>
-            <canvas 
-              className   = {classes.canvas}
-              onMouseDown = {this.onMouseDown}
-              onMouseUp   = {this.onMouseUp}
-              onMouseMove = {this.onMouseMove}
-              width       = {this.state.width}
-              height      = {this.state.height}
-              ref         = {this.refCanvas}
-              id          = "drawing">
-            </canvas>
-          </div>
+        <canvas 
+          onMouseDown = {this.onMouseDown}
+          onMouseUp   = {this.onMouseUp}
+          onMouseMove = {this.onMouseMove}
+          width       = {this.state.width}
+          height      = {this.state.height}
+          ref         = {this.refCanvas}
+          id          = "drawing">
+        </canvas>
       </div>
     )
   }
 }
 
-export default withStyles(styles)(Canvas)
+export default (Canvas)
