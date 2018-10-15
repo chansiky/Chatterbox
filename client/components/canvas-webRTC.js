@@ -26,6 +26,8 @@ class Canvas extends React.Component{
 
     this.state = {
       currentColor: 'black',
+      width: '800',
+      height: '600',
     }
     
     this.recordMouse = this.recordMouse.bind(this)
@@ -82,7 +84,7 @@ class Canvas extends React.Component{
             Title
           </div>
           <div>
-            <canvas className={classes.canvas} onMouseDown={this.recordMouse} ref={this.refCanvas} id="drawing" width="300" height="200"></canvas>
+            <canvas className={classes.canvas} onMouseDown={this.recordMouse} width={this.state.width} height={this.state.height} ref={this.refCanvas} id="drawing"></canvas>
           </div>
       </div>
     )
