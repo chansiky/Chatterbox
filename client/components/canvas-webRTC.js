@@ -24,6 +24,10 @@ class Canvas extends React.Component{
     console.log(this.refCanvas)
     console.log(this.divThing)
 
+    this.mouseDown = false;
+    this.mousePositionPrev = null;
+    this.mousePositionCurr = null;
+
     this.state = {
       currentColor: 'black',
       width: '800',
@@ -32,6 +36,10 @@ class Canvas extends React.Component{
     
     this.recordMouse = this.recordMouse.bind(this)
     this.getCanvasXY = this.getCanvasXY.bind(this)
+    this.onMouseDown = this.onMouseDown.bind(this)
+    this.onMouseUp   = this.onMouseUp.bind(this)
+    this.onMouseMove = this.onMouseMove.bind(this)
+    this.draw        = this.draw.bind(this)
   }
 
   componentDidMount(){
@@ -47,16 +55,20 @@ class Canvas extends React.Component{
 
 
   draw(start, end, strokeColor = 'black', shouldBroadcast = true) {
+    this.ctx.beginPath()
+    this.ctx.strokeStyle = this.state.strokeColor
+    this.ctx.moveTo(start.x, start.y)
+    this.ctx.lineTo(end.x, end.y)
+    this.ctx.closePath()
+    this.ctx.stroke()
   }
 
   setupCanvas() {
 
     console.log('setting up canvas')
-    this.ctx.fillStyle = 'rgb(200, 0, 0)';
-    this.ctx.fillRect(10, 10, 50, 50);
-
-    this.ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
-    this.ctx.fillRect(30, 30, 50, 50);
+    this.ctx.lineWidth = 2
+    this.ctx.lineJoin = 'round'
+    this.ctx.lineCap = 'round'
   }
 
   resize() {
@@ -66,6 +78,27 @@ class Canvas extends React.Component{
     console.log("hello", e.pageX, ", " , e.pageY)
     console.log("offsets are" , this.canvas.offsetLeft, this.canvas.offsetTop)
     console.log("canvasXY is " , this.getCanvasXY(e.pageX, e.pageY))
+  }
+
+  onMouseDown(e){
+    this.mouseDown = true
+    this.recordMouse(e)
+    this.mousePositionCurr = this.getCanvasXY(e.pageX, e.pageY)
+  }
+  
+  onMouseUp(e){
+    this.mouseDown = false
+    this.recordMouse(e)
+  }
+
+  onMouseMove(e){
+    if (this.mouseDown) {
+      this.mousePositionPrev = this.mousePositionCurr
+      this.mousePositionCurr = this.getCanvasXY(e.pageX, e.pageY)
+      
+      this.draw(this.mousePositionPrev, this.mousePositionCurr, this.state.currentColor, true)
+      this.recordMouse(e)
+    }
   }
 
 
@@ -84,7 +117,16 @@ class Canvas extends React.Component{
             Title
           </div>
           <div>
-            <canvas className={classes.canvas} onMouseDown={this.recordMouse} width={this.state.width} height={this.state.height} ref={this.refCanvas} id="drawing"></canvas>
+            <canvas 
+              className   = {classes.canvas}
+              onMouseDown = {this.onMouseDown}
+              onMouseUp   = {this.onMouseUp}
+              onMouseMove = {this.onMouseMove}
+              width       = {this.state.width}
+              height      = {this.state.height}
+              ref         = {this.refCanvas}
+              id          = "drawing">
+            </canvas>
           </div>
       </div>
     )
