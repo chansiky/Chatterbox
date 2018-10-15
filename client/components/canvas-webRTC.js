@@ -11,9 +11,6 @@ class Canvas extends React.Component{
     this.canvas = null
     this.ctx = null
 
-    console.log(this.refCanvas)
-    console.log(this.divThing)
-
     this.mouseDown = false;
     this.mousePositionPrev = null;
     this.mousePositionCurr = null;
@@ -33,7 +30,6 @@ class Canvas extends React.Component{
   }
 
   componentDidMount(){
-    console.log('componentDidMount')
     this.canvas = this.refCanvas.current
     this.ctx    = this.canvas.getContext('2d')
 
@@ -51,7 +47,6 @@ class Canvas extends React.Component{
     this.ctx.closePath()
     this.ctx.stroke()
     if(shouldBroadcast){
-      console.log('broadcasting')
       this.props.funcBroadcastRTC("DRAW",{start, end, strokeColor})
     }
   }
@@ -67,9 +62,7 @@ class Canvas extends React.Component{
   }
 
   recordMouse(e){
-    console.log("hello", e.pageX, ", " , e.pageY)
-    console.log("offsets are" , this.canvas.offsetLeft, this.canvas.offsetTop)
-    console.log("canvasXY is " , this.getCanvasXY(e.pageX, e.pageY))
+    //console.log("canvasXY is " , this.getCanvasXY(e.pageX, e.pageY))
   }
 
   onMouseDown(e){

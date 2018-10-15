@@ -9,7 +9,7 @@ const styles = {
   root: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   videoContainer: {
     display: 'flex',
@@ -31,7 +31,7 @@ const styles = {
   canvas: {
     borderStyle: 'solid',
     borderColor: 'black',
-    borderWidth: 'thin', 
+    borderWidth: 'thin'
   }
 };
 
@@ -178,7 +178,6 @@ class PeerSignalComponent extends React.Component{
 
   onReceiveMessageCallback = (event) => {
     const data = JSON.parse(event.data)
-    console.log('onReceiveMessageCallback event is:', data)
     switch(data.type){
       case CHAT:
         this.setState({
@@ -238,7 +237,6 @@ class PeerSignalComponent extends React.Component{
 
   broadcastRTC(type, value){
     const data = JSON.stringify({type: type, value: value});
-    console.log('broadcasting: ', data)
     if (this.dataChannel){
       this.dataChannel.send(data);
     }
@@ -378,7 +376,9 @@ class PeerSignalComponent extends React.Component{
         }
         </div>
 
-        <Canvas className={classes.canvas} ref={this.refCanvas} funcBroadcastRTC={this.broadcastRTC} />
+        <div className={classes.canvas}>
+          <Canvas ref={this.refCanvas} funcBroadcastRTC={this.broadcastRTC} />
+        </div>
 
         <div id="buttons">
           <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
