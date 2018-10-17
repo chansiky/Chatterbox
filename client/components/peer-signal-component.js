@@ -3,7 +3,9 @@ import {Redirect} from 'react-router'
 import socket, {socketRoomInit} from '../socket'
 import { withStyles } from '@material-ui/core/styles'
 import {servers} from '../data'
-import { Canvas } from './index'
+import { Canvas , Chat} from './index'
+import {connect} from 'react-redux'
+import {dispatchAddChatText} from '../store'
 
 const styles = {
   root: {
@@ -180,9 +182,7 @@ class PeerSignalComponent extends React.Component{
     const data = JSON.parse(event.data)
     switch(data.type){
       case CHAT:
-        this.setState({
-          receiveValues: [...this.state.receiveValues, data.value]
-        })
+        this.props.addTextToChat(data.value)
         break
       case DRAW:
         const drawValues = data.value
@@ -227,10 +227,10 @@ class PeerSignalComponent extends React.Component{
       const data = this.state.chatBox
       
       this.broadcastRTC(CHAT, data)
+      this.props.addTextToChat(data)
 
       this.setState({
         chatBox: '',
-        receiveValues: [...this.state.receiveValues, this.state.chatBox]
       })
     }
   }
@@ -352,6 +352,7 @@ class PeerSignalComponent extends React.Component{
         }}
       />
     }
+    
     return(
       <div className={classes.root}>
         <h1>
@@ -370,11 +371,7 @@ class PeerSignalComponent extends React.Component{
            </label>
            <input value="send" type="submit" disabled={this.state.disabled.chatBox} />
         </form>
-        <div>
-        {
-          this.state.receiveValues.map(value => <h5> {value} </h5>)
-        }
-        </div>
+        <Chat />
 
         <div className={classes.canvas}>
           <Canvas ref={this.refCanvas} funcBroadcastRTC={this.broadcastRTC} />
@@ -388,4 +385,16 @@ class PeerSignalComponent extends React.Component{
   }
 }
 
-export default withStyles(styles)(PeerSignalComponent)
+const mapState = (state) => {
+  return{
+
+  }
+}
+
+const mapDispatch = (dispatch) => {
+  return {
+    addTextToChat : (text) => dispatch(dispatchAddChatText(text))
+  }
+}
+
+export default connect(mapState, mapDispatch)(withStyles(styles)(PeerSignalComponent))
