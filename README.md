@@ -1,5 +1,5 @@
 # Short Description
-quick hackathon testing the capabilities of websockets and webRTC.
+quick hackathon testing the capabilities of webRTC (with signalling done through websockets)
 
 [deployed site](https://drawrtc.herokuapp.com/)
 
