@@ -34,6 +34,17 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'black',
     borderWidth: 'thin'
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  main: {
+    flexGrow: 4,
+  },
+  sides: {
+    flexGrow: 1,
   }
 };
 
@@ -355,30 +366,34 @@ class PeerSignalComponent extends React.Component{
     
     return(
       <div className={classes.root}>
-        <h1>
-          Room: {roomId}
-        </h1>
-
-        <div className={classes.videoContainer}>
-          <video ref={this.refLocalVideo} autoPlay muted className={`${classes.video} ${classes.local}`} /> 
-          <video ref={this.refRemoteVideo} autoPlay muted className={`${classes.video} ${classes.remote}`} /> 
-        </div>
-
-        <form onSubmit={this.handleChatSubmit}>
-           <label >
-             chat:
-             <input name="chatBox" ref={this.refTextBox} type="text" disabled={this.state.disabled.chatBox} value={this.state.chatBox} onChange={this.handleChange} />
-           </label>
-           <input value="send" type="submit" disabled={this.state.disabled.chatBox} />
-        </form>
-        <Chat />
-
-        <div className={classes.canvas}>
-          <Canvas ref={this.refCanvas} funcBroadcastRTC={this.broadcastRTC} />
-        </div>
-
-        <div id="buttons">
-          <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
+        <div className={classes.container}>
+          <div className={classes.sides}>
+            <h1>
+              Room: {roomId}
+            </h1>
+          </div>
+          <div className={classes.main}>
+            <div className={classes.videoContainer}>
+              <video ref={this.refLocalVideo} autoPlay muted className={`${classes.video} ${classes.local}`} /> 
+              <video ref={this.refRemoteVideo} autoPlay muted className={`${classes.video} ${classes.remote}`} /> 
+            </div>
+            <div className={classes.canvas}>
+              <Canvas ref={this.refCanvas} funcBroadcastRTC={this.broadcastRTC} />
+            </div>
+            <div id="buttons">
+              <button id="closeButton" disabled={this.state.disabled.closeButton} onClick ={this.closePeerConnection} >Stop</button>
+            </div>
+          </div>
+          <div className={classes.sides}>
+            <form onSubmit={this.handleChatSubmit}>
+               <label >
+                 chat:
+                 <input name="chatBox" ref={this.refTextBox} type="text" disabled={this.state.disabled.chatBox} value={this.state.chatBox} onChange={this.handleChange} />
+               </label>
+               <input value="send" type="submit" disabled={this.state.disabled.chatBox} />
+            </form>
+            <Chat />
+          </div>
         </div>
       </div>
     )
