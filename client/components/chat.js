@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import './chat.css'
 
 class Chat extends React.Component{
   constructor(props){
@@ -8,7 +9,7 @@ class Chat extends React.Component{
 
   render(props){
     return(
-      <div>
+      <div className="ScrollBox">
         {this.props.text &&
           this.props.text.map(value => <div> {value} </div>)
         }
