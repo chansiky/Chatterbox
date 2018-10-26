@@ -1,6 +1,8 @@
 import React from 'react'
 import { EventEmitter } from 'events'
 import { connect } from 'react-redux'
+import CreateIcon from '@material-ui/icons/create'
+import './canvas.css'
 
 class Canvas extends React.Component{
   constructor(){
@@ -97,7 +99,7 @@ class Canvas extends React.Component{
   render() {
     const { classes } = this.props
     return (
-      <div>
+      <div className="Canvas">
         <canvas 
           onMouseDown = {this.onMouseDown}
           onMouseUp   = {this.onMouseUp}
