@@ -14,12 +14,15 @@ class RoomSignalComponent extends React.Component{
   }
 
   render(props){
+    let url = document.url
     return(
       <div>
         <h1>
           Room: &nbsp;{this.state.roomId}
         </h1>
-        
+        <section> invite someone to join this room:
+          <a href={url} target="_blank"> url </a>
+        </section>
         this component will console log a bunch of signals
         <PeerSignalComponent />
       </div>

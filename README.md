@@ -6,3 +6,6 @@ quick hackathon testing the capabilities of webRTC (with signalling done through
 ## webRTC
 sometimes the connection between browsers doesn't work very well.  reccomended browser is chrome or firefox.
 
+# Development
+
+getting started: run `npm start-dev`

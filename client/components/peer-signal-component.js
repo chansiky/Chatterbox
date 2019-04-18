@@ -364,6 +364,8 @@ class PeerSignalComponent extends React.Component{
       />
     }
     
+    const url = window.location.href
+
     return(
       <div className={classes.root}>
         <div className={classes.container}>
@@ -371,6 +373,17 @@ class PeerSignalComponent extends React.Component{
             <h1>
               Room: {roomId}
             </h1>
+            <section> 
+              <div>
+                Connections are being made peer to peer through webRTC.
+              </div>
+              <div>
+                Invite someone to join this room:
+              </div>
+              <div>
+                <a href={url} target="_blank"> {url} </a>
+              </div>
+            </section>
           </div>
           <div className={classes.main}>
             <div className={classes.videoContainer}>
