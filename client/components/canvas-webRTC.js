@@ -1,7 +1,6 @@
 import React from 'react'
 import { EventEmitter } from 'events'
 import { connect } from 'react-redux'
-import CreateIcon from '@material-ui/icons/create'
 import './canvas.css'
 
 class Canvas extends React.Component{
