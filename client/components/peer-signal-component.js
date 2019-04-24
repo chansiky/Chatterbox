@@ -373,13 +373,14 @@ class PeerSignalComponent extends React.Component{
             <h1>
               Room: {roomId}
             </h1>
-            <section> 
+            <section className={classes.sides}>
               <div>
-                Connections are being made peer to peer through webRTC.
+                Connections are being peer to peer.
               </div>
               <div>
                 Invite someone to join this room:
               </div>
+              <br/>
               <div>
                 <a href={url} target="_blank"> {url} </a>
               </div>
